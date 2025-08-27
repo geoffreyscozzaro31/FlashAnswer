@@ -11,22 +11,22 @@ BASE_DIR = Path(__file__).resolve().parent
 
 app = FastAPI(
     title="QCM Resolver",
-    description="Une application pour répondre aux QCM à partir de documents."
+    description="An application to answer QCMs from documents."
 )
 
-# Monter le dossier 'static'
+# Mount the 'static' folder
 static_dir = BASE_DIR / "static"
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
-# Inclure les routes de l'API
+# Include API routes
 app.include_router(api_router, prefix="/api")
 
 @app.on_event("startup")
 def on_startup():
-    # Initialise le client ChromaDB au démarrage
+    # Initialize ChromaDB client at startup
     vector_store_service.initialize()
 
 @app.get("/", response_class=FileResponse)
 async def read_root():
-    """Sert la page d'accueil de l'application."""
+    """Serves the application's home page."""
     return FileResponse(static_dir / "index.html")

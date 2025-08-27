@@ -1,20 +1,20 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Éléments de l'Étape 1 (PDF)
+    // Step 1 (PDF) elements
     const step1 = document.getElementById('step1');
     const pdfDropZone = document.getElementById('pdfDropZone');
     const pdfInput = document.getElementById('pdfInput');
     const pdfStatus = document.getElementById('pdfStatus');
 
-    // Éléments de l'Étape 2 (QCM)
+    // Step 2 (QCM) elements
     const step2 = document.getElementById('step2');
     const qcmDropZone = document.getElementById('qcmDropZone');
     const qcmInput = document.getElementById('qcmInput');
 
-    // Éléments de statut
+    // Status elements
     const loading = document.getElementById('loading');
     const resultDiv = document.getElementById('result');
 
-    // --- Gestion du Drag & Drop ---
+    // --- Drag & Drop handling ---
     const setupDropZone = (zone, input) => {
         zone.addEventListener('click', () => input.click());
         zone.addEventListener('dragover', e => {
@@ -38,12 +38,12 @@ document.addEventListener('DOMContentLoaded', () => {
     setupDropZone(pdfDropZone, pdfInput);
     setupDropZone(qcmDropZone, qcmInput);
 
-    // --- Logique de traitement ---
+    // --- Processing logic ---
     pdfInput.addEventListener('change', async () => {
         const file = pdfInput.files[0];
         if (!file) return;
 
-        pdfStatus.textContent = `Traitement de ${file.name}...`;
+        pdfStatus.textContent = `Processing ${file.name}...`;
         loading.classList.remove('hidden');
         resultDiv.classList.add('hidden');
 
@@ -54,12 +54,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch('/api/process-document', { method: 'POST', body: formData });
             const result = await response.json();
 
-            if (!response.ok) throw new Error(result.detail || 'Erreur serveur');
+            if (!response.ok) throw new Error(result.detail || 'Server error');
 
             pdfStatus.textContent = `✅ ${result.message}`;
             step2.classList.remove('hidden');
         } catch (error) {
-            pdfStatus.textContent = `❌ Erreur : ${error.message}`;
+            pdfStatus.textContent = `❌ Error: ${error.message}`;
         } finally {
             loading.classList.add('hidden');
         }
@@ -79,11 +79,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch('/api/solve-qcm', { method: 'POST', body: formData });
             const result = await response.json();
 
-            if (!response.ok) throw new Error(result.detail || 'Erreur serveur');
+            if (!response.ok) throw new Error(result.detail || 'Server error');
 
             displayResult(result);
         } catch (error) {
-            resultDiv.innerHTML = `<h5>Erreur</h5><p>${error.message}</p>`;
+            resultDiv.innerHTML = `<h5>Error</h5><p>${error.message}</p>`;
             resultDiv.classList.remove('hidden');
         } finally {
             loading.classList.add('hidden');
@@ -92,12 +92,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function displayResult(data) {
         resultDiv.innerHTML = `
-            <h5>Réponse trouvée</h5>
-            <p><strong>Question extraite :</strong> ${data.extracted_question}</p>
-            <p><strong>Réponse suggérée :</strong></p>
+            <h5>Answer found</h5>
+            <p><strong>Extracted question:</strong> ${data.extracted_question}</p>
+            <p><strong>Suggested answer:</strong></p>
             <mark>${data.answer}</mark>
             <details>
-                <summary>Voir le contexte utilisé pour la réponse</summary>
+                <summary>Show context used for the answer</summary>
                 <pre>${data.retrieved_context}</pre>
             </details>
         `;

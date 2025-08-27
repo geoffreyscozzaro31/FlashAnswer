@@ -12,7 +12,7 @@ class VectorStoreService:
         db_path = Path(__file__).resolve().parent.parent / "db" / "chroma"
         self.client = chromadb.PersistentClient(path=str(db_path))
         self.collection = self.client.get_or_create_collection(name=config.VECTOR_STORE_COLLECTION)
-        print("ChromaDB initialisé.")
+        print("ChromaDB initialized.")
 
     def add_documents(self, chunks: list[str], embeddings: list[list[float]], metadatas: list[dict], ids: list[str]):
         if self.collection is None:
@@ -29,6 +29,6 @@ class VectorStoreService:
         if self.collection:
             self.client.delete_collection(name=self.collection.name)
             self.collection = self.client.get_or_create_collection(name=config.VECTOR_STORE_COLLECTION)
-            print(f"Collection '{self.collection.name}' vidée.")
+            print(f"Collection '{self.collection.name}' cleared.")
 
 vector_store_service = VectorStoreService()

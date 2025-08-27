@@ -7,8 +7,8 @@ from src.app import config
 
 def is_allowed_file(filename: str, file_type: str) -> bool:
     """
-    Vérifie si l'extension du fichier est autorisée pour un type donné.
-    file_type peut être 'pdf' ou 'image'.
+    Checks if the file extension is allowed for a given type.
+    file_type can be 'pdf' or 'image'.
     """
     if not filename or "." not in filename:
         return False
@@ -25,14 +25,13 @@ def is_allowed_file(filename: str, file_type: str) -> bool:
 
 def save_temp_file(file: UploadFile) -> str:
     """
-    Sauvegarde un fichier UploadFile dans un dossier temporaire
-    et retourne son chemin d'accès.
+    Saves an UploadFile to a temporary folder and returns its path.
     """
     try:
-        # Crée un fichier temporaire en conservant l'extension
+        # Create a temporary file while keeping the extension
         suffix = Path(file.filename).suffix
         with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as temp_file:
             temp_file.write(file.file.read())
             return temp_file.name
     except Exception as e:
-        raise IOError(f"Impossible de sauvegarder le fichier temporaire : {e}")
+        raise IOError(f"Unable to save temporary file: {e}")

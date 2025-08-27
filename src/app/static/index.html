@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>QCM Resolver</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <main class="container">
+        <h1>QCM Resolver</h1>
+        <article id="step1">
+            <h3>Étape 1 : Charger la base de connaissances</h3>
+            <div id="pdfDropZone" class="drop-zone">
+                <p>Glissez-déposez votre document PDF ici</p>
+                <small>ou cliquez pour sélectionner</small>
+            </div>
+            <input type="file" id="pdfInput" class="hidden" accept=".pdf">
+            <p id="pdfStatus"></p>
+        </article>
+
+        <article id="step2" class="hidden">
+            <h3>Étape 2 : Résoudre un QCM</h3>
+            <div id="qcmDropZone" class="drop-zone">
+                <p>Glissez-déposez une capture d'écran du QCM</p>
+                <small>ou cliquez pour sélectionner</small>
+            </div>
+            <input type="file" id="qcmInput" class="hidden" accept="image/*">
+        </article>
+
+        <div id="loading" class="hidden"><progress></progress></div>
+        <div id="result" class="hidden"></div>
+    </main>
+    <script src="/static/script.js"></script>
+</body>
+</html>```

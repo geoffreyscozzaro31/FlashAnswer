@@ -1,0 +1,17 @@
+# requirements.txt
+fastapi
+uvicorn[standard]
+python-dotenv
+PyYAML
+python-multipart
+
+# Pour l'OCR et le traitement des PDF/Images
+pymupdf         # Lecture et OCR des PDF
+pytesseract     # Moteur OCR
+Pillow          # Manipulation d'images
+
+# Pour la logique IA (RAG)
+langchain
+langchain-google-genai
+chromadb        # Base de données vectorielle
+tiktoken        # Pour compter les tokens

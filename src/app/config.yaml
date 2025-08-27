@@ -1,0 +1,15 @@
+# src/app/config.yaml
+app:
+  name: "QCM Resolver"
+  version: "1.0.0"
+
+upload:
+  allowed_pdf_extensions: [".pdf"]
+  allowed_image_extensions: [".png", ".jpg", ".jpeg", ".webp"]
+
+llm:
+  embedding_model: "models/embedding-001"
+  chat_model: "gemini-1.5-flash"
+
+vector_store:
+  collection_name: "qcm_documents"

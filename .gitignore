@@ -1,0 +1,5 @@
+data/*
+resources/*
+.env
+.secrets
+src/app/db/*

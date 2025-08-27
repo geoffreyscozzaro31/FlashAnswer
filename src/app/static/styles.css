@@ -1,0 +1,151 @@
+/* src/app/static/styles.css */
+
+/* --- Variables de Thème --- */
+:root {
+    --primary-color: #007bff;
+    --primary-hover: #0056b3;
+    --background-color: #f8f9fa;
+    --card-background: #ffffff;
+    --text-color: #212529;
+    --border-color: #dee2e6;
+    --dropzone-border: #adb5bd;
+    --dropzone-hover-bg: #e9ecef;
+    --success-color: #28a745;
+    --error-color: #dc3545;
+    --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* --- Styles Généraux --- */
+body {
+    font-family: var(--font-family);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 2rem;
+}
+
+.container {
+    max-width: 800px;
+    margin: auto;
+}
+
+h1, h3 {
+    color: var(--text-color);
+    text-align: center;
+}
+
+h1 {
+    margin-bottom: 2rem;
+}
+
+/* --- Cartes (Articles) --- */
+article {
+    background-color: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* --- Zone de Drag & Drop --- */
+.drop-zone {
+    border: 2px dashed var(--dropzone-border);
+    border-radius: 8px;
+    padding: 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.drop-zone p {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.drop-zone small {
+    color: #6c757d;
+}
+
+.drop-zone.dragover {
+    background-color: var(--dropzone-hover-bg);
+    border-color: var(--primary-color);
+}
+
+.drop-zone.disabled {
+    background-color: #f1f1f1;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* --- Statut et Résultats --- */
+#pdfStatus {
+    text-align: center;
+    margin-top: 1rem;
+    font-weight: 500;
+}
+
+#pdfStatus.success {
+    color: var(--success-color);
+}
+
+#pdfStatus.error {
+    color: var(--error-color);
+}
+
+#loading {
+    text-align: center;
+    padding: 2rem;
+}
+
+#result {
+    background-color: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+#result h5 {
+    margin-top: 0;
+    font-size: 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+#result mark {
+    background-color: #d1ecf1;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    display: inline-block;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+#result details {
+    margin-top: 1.5rem;
+}
+
+#result summary {
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--primary-color);
+}
+
+#result pre {
+    background-color: #f1f1f1;
+    padding: 1rem;
+    border-radius: 4px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    margin-top: 0.5rem;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.hidden {
+    display: none;
+}

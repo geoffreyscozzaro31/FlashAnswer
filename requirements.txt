@@ -7,7 +7,7 @@ python-multipart
 
 # Pour l'OCR et le traitement des PDF/Images
 pymupdf         # Lecture et OCR des PDF
-pytesseract     # Moteur OCR
+easyocr     # Moteur OCR
 Pillow          # Manipulation d'images
 
 # Pour la logique IA (RAG)

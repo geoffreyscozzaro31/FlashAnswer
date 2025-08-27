@@ -1,8 +1,9 @@
-# src/app/api/routes.py
-from fastapi import APIRouter, UploadFile, File, HTTPException, status
+from fastapi import APIRouter, UploadFile, File, HTTPException, status, Form
 from src.app.service.document_service import process_document_and_embed
 from src.app.service.qcm_analysis_service import analyze_qcm_screenshot
 from src.app.utils.file_utils import is_allowed_file, save_temp_file
+from src.app.service.vector_store_service import vector_store_service
+import json
 
 api_router = APIRouter()
 
@@ -10,33 +11,60 @@ api_router = APIRouter()
 async def process_document(file: UploadFile = File(...)):
     """
     Endpoint to upload a PDF. The text is extracted, split into chunks,
-    and stored in the ChromaDB vector database.
+    and added to the ChromaDB vector database.
     """
     if not is_allowed_file(file.filename, "pdf"):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="PDF file type not allowed.")
 
     try:
-        # Temporary save for processing
         temp_path = save_temp_file(file)
-        # Service that handles OCR, chunking, and embedding
-        chunk_count = await process_document_and_embed(temp_path)
-        return {"message": f"Document processed successfully. {chunk_count} segments added to the knowledge base."}
+        # Pass the original filename to the service for metadata
+        chunk_count = await process_document_and_embed(temp_path, file.filename)
+        return {"message": f"Document '{file.filename}' processed successfully. {chunk_count} segments added."}
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @api_router.post("/solve-qcm", summary="Analyze a QCM screenshot and find the answer")
-async def solve_qcm(file: UploadFile = File(...)):
+async def solve_qcm(context_ids: str = Form("[]"), file: UploadFile = File(...)):
     """
     Endpoint to upload a QCM screenshot.
-    The text is extracted via OCR, then RAG is used to find the answer.
+    The text is extracted via OCR, then RAG is used to find the answer
+    using the selected context documents.
     """
     if not is_allowed_file(file.filename, "image"):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Image file type not allowed.")
 
     try:
+        # Decode the JSON string of document IDs
+        doc_ids = json.loads(context_ids)
+        if not isinstance(doc_ids, list):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="context_ids must be a JSON array of strings.")
+
         temp_path = save_temp_file(file)
-        # Service that handles image analysis and answer retrieval
-        result = await analyze_qcm_screenshot(temp_path)
+        # Pass the list of context IDs to the analysis service
+        result = await analyze_qcm_screenshot(temp_path, doc_ids)
         return result
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid JSON format for context_ids.")
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+@api_router.get("/documents", summary="List all processed documents")
+async def get_documents():
+    """Endpoint to get the list of all unique documents in the knowledge base."""
+    try:
+        documents = vector_store_service.get_all_documents()
+        return documents
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+@api_router.delete("/documents/{doc_id}", summary="Delete a document and its embeddings")
+async def delete_document(doc_id: str):
+    """Endpoint to delete a document and all its associated chunks from the vector store."""
+    try:
+        success = vector_store_service.delete_document(doc_id)
+        if not success:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found.")
+        return {"message": f"Document {doc_id} deleted successfully."}
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

@@ -1,49 +1,63 @@
-# src/app/service/qcm_analysis_service.py
-import pytesseract
+import json
+
+import easyocr
 from PIL import Image
-from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
 from langchain.prompts import PromptTemplate
-from src.app.service.vector_store_service import vector_store_service
+from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
+
 from src.app import config
+from src.app.service.vector_store_service import vector_store_service
 
 
-async def analyze_qcm_screenshot(image_path: str) -> dict:
-    """OCR the image, RAG to find the answer."""
-    # 1. OCR to extract raw text from the image
+async def analyze_qcm_screenshot_easyocr(image_path: str, context_doc_ids: list[str]) -> dict:
+    """OCR avec EasyOCR, puis RAG pour trouver la réponse."""
+    # 1. OCR avec EasyOCR
     try:
-        raw_text = pytesseract.image_to_string(Image.open(image_path))
-        if not raw_text.strip():
-            raise ValueError("OCR did not detect any text on the image.")
-    except Exception as e:
-        raise RuntimeError(f"Error during OCR: {e}")
+        # Initialiser EasyOCR (supporte français et anglais)
+        reader = easyocr.Reader(['fr', 'en'], gpu=False)  # gpu=True si CUDA disponible
 
-    # 2. Use Gemini to extract the question and options from the raw text
+        # Lire l'image
+        image = Image.open(image_path)
+
+        # EasyOCR peut prendre directement le chemin ou un array numpy
+        results = reader.readtext(image_path)
+
+        # Extraire le texte
+        raw_text = ' '.join([result[1] for result in results])
+
+        if not raw_text.strip():
+            raise ValueError("EasyOCR n'a détecté aucun texte dans l'image.")
+
+    except Exception as e:
+        raise RuntimeError(f"Erreur lors de l'OCR avec EasyOCR: {e}")
+
+    # Le reste du code reste identique...
     llm = ChatGoogleGenerativeAI(model=config.LLM_CHAT_MODEL, google_api_key=config.GEMINI_API_KEY, temperature=0)
 
     extraction_prompt = PromptTemplate.from_template(
-        """Extract the main question and answer options from the following OCR text.\nRespond only with a JSON containing the keys 'question' and 'options' (a list of strings).\nOCR TEXT :\n---\n{ocr_text}\n---\nJSON :"""
+        """Extrait la question principale et les options de réponse du texte OCR suivant.\nRéponds uniquement avec un JSON contenant les clés 'question' et 'options' (une liste de chaînes).\nTEXTE OCR :\n---\n{ocr_text}\n---\nJSON :"""
     )
     extraction_chain = extraction_prompt | llm
     response_json_str = await extraction_chain.ainvoke({"ocr_text": raw_text})
 
-    import json
     try:
         qcm_data = json.loads(response_json_str.content)
         question = qcm_data["question"]
     except (json.JSONDecodeError, KeyError):
-        # If the LLM fails, use the raw text as fallback
+        qcm_data = {}
         question = raw_text
 
-    # 3. RAG: Search for relevant documents in ChromaDB
+    # RAG et réponse (identique au code original)
     embeddings_model = GoogleGenerativeAIEmbeddings(model=config.LLM_EMBEDDING_MODEL,
                                                     google_api_key=config.GEMINI_API_KEY)
     query_embedding = embeddings_model.embed_query(question)
-    context_chunks = vector_store_service.query(query_embedding, n_results=5)
-    context = "\n\n---\n\n".join(context_chunks)
 
-    # 4. Use Gemini with the context to find the correct answer
+    context_chunks = vector_store_service.query(query_embedding, n_results=5, context_doc_ids=context_doc_ids)
+    context = "\n\n---\n\n".join(
+        context_chunks) if context_chunks else "Aucun contexte pertinent trouvé dans les documents sélectionnés."
+
     answer_prompt = PromptTemplate.from_template(
-        """Based **only** on the provided CONTEXT, answer the following QUESTION.\nAmong the OPTIONS, choose the most accurate answer justified by the context.\nYour answer must be only the text of the correct option.\n\nCONTEXT :\n{context}\n\nQUESTION : {question}\n\nOPTIONS :\n{options}\n\nCORRECT ANSWER :"""
+        """Basé **uniquement** sur le CONTEXTE fourni, réponds à la QUESTION suivante.\nParmi les OPTIONS, choisis la réponse la plus précise justifiée par le contexte.\nTa réponse doit être seulement le texte de l'option correcte.\n\nCONTEXTE :\n{context}\n\nQUESTION : {question}\n\nOPTIONS :\n{options}\n\nRÉPONSE CORRECTE :"""
     )
     answer_chain = answer_prompt | llm
     response = await answer_chain.ainvoke({
@@ -53,7 +67,7 @@ async def analyze_qcm_screenshot(image_path: str) -> dict:
     })
 
     return {
-        "extracted_question": qcm_data.get("question", "Extraction failed"),
+        "extracted_question": qcm_data.get("question", "Extraction échouée"),
         "options": qcm_data.get("options", []),
         "answer": response.content.strip(),
         "retrieved_context": context

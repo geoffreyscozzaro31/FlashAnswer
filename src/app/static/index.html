@@ -8,49 +8,59 @@
     <script src="/static/script.js" defer></script>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="header-content">
-                <div class="title-group">
-                    <h1 data-i18n-key="title">QCM Resolver</h1>
-                    <p data-i18n-key="subtitle">Uploadez votre cours, puis la capture de votre QCM pour trouver la réponse.</p>
+    <div class="app-layout">
+        <!-- Sidebar for Context Management -->
+        <aside id="contextSidebar" class="sidebar">
+            <div class="sidebar-header">
+                <h3>Base de Connaissances</h3>
+                <p>Ajoutez ou sélectionnez des documents à utiliser.</p>
+            </div>
+            <div class="sidebar-content">
+                <div class="form-group">
+                    <div id="pdfDropZone" class="drop-zone" tabindex="0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        <p data-i18n-key="pdfDropText">Ajouter un PDF...</p>
+                    </div>
+                    <input type="file" id="pdfInput" accept=".pdf" hidden>
+                    <div id="pdfUploadStatus" class="file-list"></div>
                 </div>
-                <div class="lang-switcher">
-                    <button class="lang-btn active" data-lang="fr" title="Français">🇫🇷</button>
-                    <button class="lang-btn" data-lang="en" title="English">🇬🇧</button>
+                <hr>
+                <div id="documentList">
+                    <!-- Loaded documents will appear here -->
                 </div>
             </div>
-        </header>
+        </aside>
 
-        <main>
-            <div id="formCard" class="card">
-                <div id="step1">
-                    <div class="form-group">
-                        <label data-i18n-key="step1Title">Étape 1 : Uploadez votre base de connaissances</label>
-                        <div id="pdfDropZone" class="drop-zone" tabindex="0">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                            <p data-i18n-key="pdfDropText">Glissez-déposez un fichier PDF ou <strong>cliquez ici</strong></p>
-                        </div>
-                        <input type="file" id="pdfInput" accept=".pdf" hidden>
-                        <div id="pdfFileList" class="file-list"></div>
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header>
+                <div class="header-content">
+                    <div class="title-group">
+                        <h1 data-i18n-key="title">QCM Resolver</h1>
+                        <p data-i18n-key="subtitle">Uploadez votre QCM pour trouver la réponse basée sur le contexte sélectionné.</p>
+                    </div>
+                    <div class="lang-switcher">
+                        <button class="lang-btn active" data-lang="fr" title="Français">🇫🇷</button>
+                        <button class="lang-btn" data-lang="en" title="English">🇬🇧</button>
                     </div>
                 </div>
+            </header>
 
-                <div id="step2" class="hidden">
-                     <div class="form-group">
-                        <label data-i18n-key="step2Title">Étape 2 : Uploadez la capture du QCM</label>
-                        <div id="qcmDropZone" class="drop-zone" tabindex="0">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                            <p data-i18n-key="qcmDropText">Glissez-déposez une image ou <strong>cliquez ici</strong></p>
-                        </div>
-                        <input type="file" id="qcmInput" accept="image/*" hidden>
-                        <div id="qcmFileList" class="file-list"></div>
+            <div id="qcmCard" class="card">
+                <div class="form-group">
+                    <label data-i18n-key="step2Title">Uploadez la capture du QCM</label>
+                    <div id="qcmDropZone" class="drop-zone" tabindex="0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        <p data-i18n-key="qcmDropText">Glissez-déposez une image ou <strong>cliquez ici</strong></p>
                     </div>
+                    <input type="file" id="qcmInput" accept="image/*" hidden>
+                    <div id="qcmFileList" class="file-list"></div>
                 </div>
             </div>
 
             <section id="resultsSection" class="hidden">
-                <div id="loadingState" class="card hidden">
+                 <!-- The states (loading, error, result) remain the same -->
+                 <div id="loadingState" class="card hidden">
                     <div class="spinner"></div>
                     <p data-i18n-key="processing">Génération en cours...</p>
                     <span id="loadingMessage"></span>
@@ -82,5 +92,4 @@
         </main>
     </div>
 </body>
-</html>```
-
+</html>

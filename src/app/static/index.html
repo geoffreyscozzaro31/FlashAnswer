@@ -1,36 +1,86 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QCM Resolver</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
     <link rel="stylesheet" href="/static/styles.css">
+    <script src="/static/script.js" defer></script>
 </head>
 <body>
-    <main class="container">
-        <h1>QCM Resolver</h1>
-        <article id="step1">
-            <h3>Step 1: Load the knowledge base</h3>
-            <div id="pdfDropZone" class="drop-zone">
-                <p>Drag and drop your PDF document here</p>
-                <small>or click to select</small>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="title-group">
+                    <h1 data-i18n-key="title">QCM Resolver</h1>
+                    <p data-i18n-key="subtitle">Uploadez votre cours, puis la capture de votre QCM pour trouver la réponse.</p>
+                </div>
+                <div class="lang-switcher">
+                    <button class="lang-btn active" data-lang="fr" title="Français">🇫🇷</button>
+                    <button class="lang-btn" data-lang="en" title="English">🇬🇧</button>
+                </div>
             </div>
-            <input type="file" id="pdfInput" class="hidden" accept=".pdf">
-            <p id="pdfStatus"></p>
-        </article>
+        </header>
 
-        <article id="step2" class="hidden">
-            <h3>Step 2: Solve a QCM</h3>
-            <div id="qcmDropZone" class="drop-zone">
-                <p>Drag and drop a screenshot of the QCM</p>
-                <small>or click to select</small>
+        <main>
+            <div id="formCard" class="card">
+                <div id="step1">
+                    <div class="form-group">
+                        <label data-i18n-key="step1Title">Étape 1 : Uploadez votre base de connaissances</label>
+                        <div id="pdfDropZone" class="drop-zone" tabindex="0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                            <p data-i18n-key="pdfDropText">Glissez-déposez un fichier PDF ou <strong>cliquez ici</strong></p>
+                        </div>
+                        <input type="file" id="pdfInput" accept=".pdf" hidden>
+                        <div id="pdfFileList" class="file-list"></div>
+                    </div>
+                </div>
+
+                <div id="step2" class="hidden">
+                     <div class="form-group">
+                        <label data-i18n-key="step2Title">Étape 2 : Uploadez la capture du QCM</label>
+                        <div id="qcmDropZone" class="drop-zone" tabindex="0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                            <p data-i18n-key="qcmDropText">Glissez-déposez une image ou <strong>cliquez ici</strong></p>
+                        </div>
+                        <input type="file" id="qcmInput" accept="image/*" hidden>
+                        <div id="qcmFileList" class="file-list"></div>
+                    </div>
+                </div>
             </div>
-            <input type="file" id="qcmInput" class="hidden" accept="image/*">
-        </article>
 
-        <div id="loading" class="hidden"><progress></progress></div>
-        <div id="result" class="hidden"></div>
-    </main>
-    <script src="/static/script.js"></script>
+            <section id="resultsSection" class="hidden">
+                <div id="loadingState" class="card hidden">
+                    <div class="spinner"></div>
+                    <p data-i18n-key="processing">Génération en cours...</p>
+                    <span id="loadingMessage"></span>
+                </div>
+
+                <div id="errorState" class="card error-card hidden">
+                    <h3 data-i18n-key="error">Erreur</h3>
+                    <p id="errorMessage"></p>
+                    <button id="resetBtn" class="btn-secondary" data-i18n-key="retry">Réessayer</button>
+                </div>
+
+                <div id="resultState" class="card hidden">
+                    <h2 data-i18n-key="answerFound">Réponse trouvée</h2>
+                    <div class="result-item">
+                        <strong data-i18n-key="extractedQuestion">Question extraite :</strong>
+                        <p id="resultQuestion"></p>
+                    </div>
+                    <div class="result-item">
+                        <strong data-i18n-key="suggestedAnswer">Réponse suggérée :</strong>
+                        <mark id="resultAnswer"></mark>
+                    </div>
+                    <details>
+                        <summary data-i18n-key="showContext">Afficher le contexte utilisé</summary>
+                        <pre><code id="resultContext"></code></pre>
+                    </details>
+                    <button id="startOverBtn" class="btn-secondary" data-i18n-key="startOver">Recommencer</button>
+                </div>
+            </section>
+        </main>
+    </div>
 </body>
-</html>
+</html>```
+

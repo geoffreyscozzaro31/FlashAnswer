@@ -1,7 +1,6 @@
 import json
 
 import easyocr
-from PIL import Image
 from langchain.prompts import PromptTemplate
 from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
 
@@ -9,20 +8,15 @@ from src.app import config
 from src.app.service.vector_store_service import vector_store_service
 
 
-async def analyze_qcm_screenshot_easyocr(image_path: str, context_doc_ids: list[str]) -> dict:
+async def analyze_qcm_screenshot(image_path: str, context_doc_ids: list[str]) -> dict:
     """OCR avec EasyOCR, puis RAG pour trouver la réponse."""
-    # 1. OCR avec EasyOCR
     try:
-        # Initialiser EasyOCR (supporte français et anglais)
         reader = easyocr.Reader(['fr', 'en'], gpu=False)  # gpu=True si CUDA disponible
 
-        # Lire l'image
-        image = Image.open(image_path)
+        # image = Image.open(image_path)
 
-        # EasyOCR peut prendre directement le chemin ou un array numpy
         results = reader.readtext(image_path)
 
-        # Extraire le texte
         raw_text = ' '.join([result[1] for result in results])
 
         if not raw_text.strip():
@@ -31,7 +25,6 @@ async def analyze_qcm_screenshot_easyocr(image_path: str, context_doc_ids: list[
     except Exception as e:
         raise RuntimeError(f"Erreur lors de l'OCR avec EasyOCR: {e}")
 
-    # Le reste du code reste identique...
     llm = ChatGoogleGenerativeAI(model=config.LLM_CHAT_MODEL, google_api_key=config.GEMINI_API_KEY, temperature=0)
 
     extraction_prompt = PromptTemplate.from_template(
@@ -47,7 +40,6 @@ async def analyze_qcm_screenshot_easyocr(image_path: str, context_doc_ids: list[
         qcm_data = {}
         question = raw_text
 
-    # RAG et réponse (identique au code original)
     embeddings_model = GoogleGenerativeAIEmbeddings(model=config.LLM_EMBEDDING_MODEL,
                                                     google_api_key=config.GEMINI_API_KEY)
     query_embedding = embeddings_model.embed_query(question)

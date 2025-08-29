@@ -9,8 +9,8 @@ The application runs entirely on your machine, ensuring your data's privacy.
 -   **Intuitive Web Interface**: A simple, two-step web page to load your knowledge and solve MCQs.
 -   **PDF Knowledge Ingestion**: Build a knowledge base by dragging and dropping a single PDF file.
 -   **Screenshot-based Solving**: Take a picture of your MCQ, upload it, and let the AI find the answer.
--   **AI-Powered (RAG)**: Uses a **Retrieval-Augmented Generation (RAG)** technique with Google Gemini to find the most relevant answers in your documents.
--   **Built-in OCR**: Automatically extracts text from PDFs and MCQ images using an OCR engine.
+-   **AI-Powered Vision & RAG**: Uses Google Gemini Vision API to extract questions from images and **Retrieval-Augmented Generation (RAG)** to find the most relevant answers in your documents.
+-   **Advanced Text Extraction**: Automatically extracts text from PDFs and analyzes MCQ images using Google Gemini Vision.
 -   **Local & Private**: No data is sent to external servers, except for secure calls to the Gemini API. No user accounts are required.
 -   **RESTful API**: Two clear endpoints to integrate this logic into other applications if needed.
 
@@ -21,26 +21,26 @@ QCM_Resolver/
 ├── src/
 │   ├── app/
 │   │   ├── api/
-│   │   │   └── routes.py                  # Endpoints: /process-document and /solve-qcm
+│   │   │   └── routes.py                      # Endpoints: /process-document and /solve-qcm
 │   │   ├── db/
-│   │   │   └── chroma/                    # Directory for the ChromaDB database
+│   │   │   └── chroma/                        # Directory for the ChromaDB database
 │   │   ├── service/
-│   │   │   ├── document_service.py        # PDF OCR and embedding
-│   │   │   ├── qcm_analysis_service.py    # Screenshot OCR and RAG logic
-│   │   │   └── vector_store_service.py    # Service to interact with ChromaDB
+│   │   │   ├── document_service.py            # PDF text extraction and embedding
+│   │   │   ├── qcm_vision_analysis_service.py # Gemini Vision analysis and RAG logic
+│   │   │   └── vector_store_service.py        # Service to interact with ChromaDB
 │   │   ├── static/
-│   │   │   ├── index.html                 # User interface
-│   │   │   ├── script.js                  # Front-end logic
-│   │   │   └── styles.css                 # UI design
+│   │   │   ├── index.html                     # User interface
+│   │   │   ├── script.js                      # Front-end logic
+│   │   │   └── styles.css                     # UI design
 │   │   ├── utils/
-│   │   │   └── file_utils.py              # File utility functions
-│   │   ├── .env.example                   # Environment variables template
-│   │   ├── app.py                         # FastAPI application entry point
-│   │   ├── config.py                      # Configuration loader
-│   │   └── config.yaml                    # Static parameters (models, etc.)
+│   │   │   └── file_utils.py                  # File utility functions
+│   │   ├── .env.example                       # Environment variables template
+│   │   ├── app.py                             # FastAPI application entry point
+│   │   ├── config.py                          # Configuration loader
+│   │   └── config.yaml                        # Static parameters (models, etc.)
 │   └── __init__.py
-├── requirements.txt                       # Python dependencies
-└── README.md                              # This file
+├── requirements.txt                           # Python dependencies
+└── README.md                                  # This file
 ```
 
 ## 🚀 Getting Started
@@ -51,10 +51,7 @@ Follow these steps to install and run the project on your local machine.
 
 -   Python 3.10+
 -   `pip` (Python's package manager)
--   **Tesseract OCR**: This is a **mandatory** prerequisite for the OCR to work.
-    -   **Windows**: Download and install from the [official installer](https://github.com/UB-Mannheim/tesseract/wiki). Make sure to add Tesseract to your system's PATH during installation.
-    -   **macOS**: `brew install tesseract`
-    -   **Linux (Debian/Ubuntu)**: `sudo apt update && sudo apt install tesseract-ocr`
+-   **Google Gemini API Key**: Required for vision analysis and text generation
 
 ### 2. Installation
 
@@ -131,12 +128,17 @@ curl -X POST "http://127.0.0.1:8000/api/process-document" \
 
 ### Endpoint: `POST /api/solve-qcm`
 
-This endpoint analyzes an MCQ image and returns the answer found in the knowledge base.
+This endpoint analyzes an MCQ image using Gemini Vision and returns the answer found in the knowledge base using RAG.
+
+**Parameters:**
+- `file`: Image file containing the MCQ (PNG, JPG, JPEG)
+- `context_ids`: JSON array of document IDs to use as context (optional, defaults to all documents)
 
 **Example with `curl`:**
 ```bash
 curl -X POST "http://127.0.0.1:8000/api/solve-qcm" \
-     -F "file=@/path/to/your/screenshot.png"
+     -F "file=@/path/to/your/screenshot.png" \
+     -F "context_ids=[\"doc_id_1\", \"doc_id_2\"]"
 ```
 
 **Success Response:**
@@ -150,6 +152,20 @@ curl -X POST "http://127.0.0.1:8000/api/solve-qcm" \
     "Compiling Python code"
   ],
   "answer": "Creating high-performance web APIs",
-  "retrieved_context": "FastAPI is a modern, fast (high-performance) web framework for building APIs with Python 3.7+..."
+  "retrieved_context": "FastAPI is a modern, fast (high-performance) web framework for building APIs with Python 3.7+...",
+  "timings": {
+    "vision_time": 2.45,
+    "rag_time": 0.32,
+    "answer_time": 1.18,
+    "total_time": 3.95
+  }
 }
 ```
+
+### Additional Endpoints
+
+#### `GET /api/documents`
+List all processed documents in the knowledge base.
+
+#### `DELETE /api/documents/{doc_id}`
+Delete a specific document and its embeddings from the knowledge base.

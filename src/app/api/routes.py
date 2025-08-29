@@ -1,11 +1,17 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException, status, Form
-from src.app.service.document_service import process_document_and_embed
-from src.app.service.qcm_analysis_service import analyze_qcm_screenshot
-from src.app.utils.file_utils import is_allowed_file, save_temp_file
-from src.app.service.vector_store_service import vector_store_service
+import asyncio
 import json
+import os
+from typing import List
+
+from fastapi import APIRouter, UploadFile, File, HTTPException, status, Form
+
+from src.app.service.document_service import process_document_and_embed
+from src.app.service.qcm_vision_service import qcm_vision_analysis_service
+from src.app.service.vector_store_service import vector_store_service
+from src.app.utils.file_utils import is_allowed_file, save_temp_file
 
 api_router = APIRouter()
+
 
 @api_router.post("/process-document", summary="Process and embed a PDF document")
 async def process_document(file: UploadFile = File(...)):
@@ -14,7 +20,7 @@ async def process_document(file: UploadFile = File(...)):
     and added to the ChromaDB vector database.
     """
     if not is_allowed_file(file.filename, "pdf"):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="PDF file type not allowed.")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Context file type not allowed.")
 
     try:
         temp_path = save_temp_file(file)
@@ -24,30 +30,35 @@ async def process_document(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
+
 @api_router.post("/solve-qcm", summary="Analyze a QCM screenshot and find the answer")
 async def solve_qcm(context_ids: str = Form("[]"), file: UploadFile = File(...)):
-    """
-    Endpoint to upload a QCM screenshot.
-    The text is extracted via OCR, then RAG is used to find the answer
-    using the selected context documents.
-    """
     if not is_allowed_file(file.filename, "image"):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Image file type not allowed.")
 
+    temp_path = None
     try:
-        # Decode the JSON string of document IDs
-        doc_ids = json.loads(context_ids)
-        if not isinstance(doc_ids, list):
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="context_ids must be a JSON array of strings.")
+        doc_ids: List[str] = json.loads(context_ids)
 
         temp_path = save_temp_file(file)
-        # Pass the list of context IDs to the analysis service
-        result = await analyze_qcm_screenshot(temp_path, doc_ids)
+
+        result = await asyncio.to_thread(
+            qcm_vision_analysis_service.analyze_qcm_complete,
+            image_path=temp_path,
+            context_doc_ids=doc_ids
+        )
         return result
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid JSON format for context_ids.")
+
+    except HTTPException as http_exc:
+        raise http_exc
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+        print(f"An unexpected error occurred: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail=f"An internal error occurred: {e}")
+    finally:
+        if temp_path and os.path.exists(temp_path):
+            os.remove(temp_path)
+
 
 @api_router.get("/documents", summary="List all processed documents")
 async def get_documents():
@@ -57,6 +68,7 @@ async def get_documents():
         return documents
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
 
 @api_router.delete("/documents/{doc_id}", summary="Delete a document and its embeddings")
 async def delete_document(doc_id: str):

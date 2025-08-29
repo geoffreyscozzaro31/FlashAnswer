@@ -86,10 +86,13 @@ class QCMResolverApp {
 
     async fetchAndRenderDocuments() {
         try {
+            console.log('Fetching documents...'); // Debug
             const response = await fetch('/api/documents');
+            console.log('Response:', response.status); // Debug
+
             if (!response.ok) throw new Error('Failed to fetch documents.');
             this.state.documents = await response.json();
-            
+            console.log('Documents loaded:', this.state.documents);
             this.dom.documentList.innerHTML = '';
             if (this.state.documents.length === 0) {
                 this.dom.documentList.innerHTML = '<p>Aucun document dans la base.</p>';

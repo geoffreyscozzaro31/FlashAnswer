@@ -82,8 +82,7 @@ Follow these steps to install and run the project on your local machine.
 
 1.  **Environment File (`.env`)**
     This file will hold your Google Gemini API key.
-    -   Rename the `.env.example` file to `.env`.
-    -   Open the `.env` file and add your API key:
+    -   Create `.env` file at the folder root add your API key:
     ```
     # .env
     GEMINI_API_KEY="YOUR_SECRET_GEMINI_API_KEY"

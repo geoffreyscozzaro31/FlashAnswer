@@ -180,3 +180,63 @@ label { display: block; font-weight: 600; margin-bottom: 1rem; font-size: 1.2rem
 
 .error-card { border-left: 4px solid var(--error-color); text-align: left; }
 .error-card h3 { color: var(--error-color); }
+
+
+/* Context instruction styling */
+.context-instruction {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background-color: rgba(59, 130, 246, 0.1);
+    border-left: 3px solid #3b82f6;
+    border-radius: 0.25rem;
+}
+
+.context-instruction p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #e6e9ed;
+}
+
+/* Warning message styling */
+.warning-message {
+    background-color: #fef3c7;
+    border: 1px solid #f59e0b;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    animation: fadeIn 0.3s ease-in;
+}
+
+.warning-message p {
+    margin: 0;
+    color: #92400e;
+    font-size: 0.875rem;
+}
+
+.warning-message.hidden {
+    display: none;
+}
+
+/* Document item styling for better interaction feedback */
+.document-item {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    border: 2px solid transparent;
+}
+
+.document-item:hover {
+    background-color: #f3f4f6;
+}
+
+.document-item.active {
+    background-color: #e0f2fe;
+    border-color: #0284c7;
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

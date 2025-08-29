@@ -23,6 +23,9 @@
                     </div>
                     <input type="file" id="pdfInput" accept=".pdf" hidden>
                     <div id="pdfUploadStatus" class="file-list"></div>
+                    <div class="context-instruction">
+                        <p data-i18n-key="contextInstruction">📋 Cliquez sur les documents pour les sélectionner comme contexte</p>
+                    </div>
                 </div>
                 <hr>
                 <div id="documentList">
@@ -49,6 +52,9 @@
             <div id="qcmCard" class="card">
                 <div class="form-group">
                     <label data-i18n-key="step2Title">Uploadez la capture du QCM</label>
+                    <div id="contextWarning" class="warning-message hidden">
+                        <p data-i18n-key="contextWarning">⚠️ Veuillez sélectionner au moins un document de contexte dans la sidebar</p>
+                    </div>
                     <div id="qcmDropZone" class="drop-zone" tabindex="0">
                         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                         <p data-i18n-key="qcmDropText">Glissez-déposez une image ou <strong>cliquez ici</strong></p>

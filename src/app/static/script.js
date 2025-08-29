@@ -10,7 +10,7 @@ class QCMResolverApp {
         this.cacheDOMElements();
         this.setupEventListeners();
         this.initI18n();
-        this.fetchAndRenderDocuments(); // Load documents on startup
+        this.fetchAndRenderDocuments();
     }
 
     cacheDOMElements() {
@@ -27,6 +27,7 @@ class QCMResolverApp {
             qcmDropZone: document.getElementById('qcmDropZone'),
             qcmInput: document.getElementById('qcmInput'),
             qcmFileList: document.getElementById('qcmFileList'),
+            contextWarning: document.getElementById('contextWarning'),
             errorMessage: document.getElementById('errorMessage'),
             resultQuestion: document.getElementById('resultQuestion'),
             resultAnswer: document.getElementById('resultAnswer'),
@@ -50,16 +51,41 @@ class QCMResolverApp {
     }
 
     setupDropZone(zone, input, type) {
-        zone.addEventListener('click', () => input.click());
-        zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+        zone.addEventListener('click', () => {
+            if (type === 'qcm' && this.state.selectedContextIds.size === 0) {
+                this.showContextWarning();
+                return;
+            }
+            input.click();
+        });
+        zone.addEventListener('dragover', e => {
+            e.preventDefault();
+            if (type === 'qcm' && this.state.selectedContextIds.size === 0) {
+                this.showContextWarning();
+                return;
+            }
+            zone.classList.add('dragover');
+        });
         zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
         zone.addEventListener('drop', e => {
             e.preventDefault();
             zone.classList.remove('dragover');
+            if (type === 'qcm' && this.state.selectedContextIds.size === 0) {
+                this.showContextWarning();
+                return;
+            }
             if (e.dataTransfer.files.length) {
                 this.handleFileSelect(e.dataTransfer.files[0], type);
             }
         });
+    }
+
+    showContextWarning() {
+        if (!this.dom.contextWarning) return;
+        this.dom.contextWarning.classList.remove('hidden');
+        setTimeout(() => {
+            this.dom.contextWarning.classList.add('hidden');
+        }, 5000);
     }
 
     async handleFileSelect(file, type) {
@@ -72,7 +98,7 @@ class QCMResolverApp {
             await this.solveQCM();
         }
     }
-    
+
     updateQcmFileListUI() {
         const file = this.state.qcmFile;
         const listElement = this.dom.qcmFileList;
@@ -86,36 +112,39 @@ class QCMResolverApp {
 
     async fetchAndRenderDocuments() {
         try {
-            console.log('Fetching documents...'); // Debug
             const response = await fetch('/api/documents');
-            console.log('Response:', response.status); // Debug
-
             if (!response.ok) throw new Error('Failed to fetch documents.');
             this.state.documents = await response.json();
-            console.log('Documents loaded:', this.state.documents);
-            this.dom.documentList.innerHTML = '';
-            if (this.state.documents.length === 0) {
-                this.dom.documentList.innerHTML = '<p>Aucun document dans la base.</p>';
-                return;
-            }
-
-            this.state.documents.forEach(doc => {
-                const docEl = document.createElement('div');
-                docEl.className = 'document-item';
-                docEl.dataset.id = doc.id;
-                if (this.state.selectedContextIds.has(doc.id)) {
-                    docEl.classList.add('active');
-                }
-                docEl.innerHTML = `
-                    <span class="document-name" title="${doc.name}">${doc.name}</span>
-                    <button class="delete-doc-btn" data-action="delete" title="Supprimer">&times;</button>
-                `;
-                this.dom.documentList.appendChild(docEl);
-            });
+            this.renderDocumentList();
         } catch (error) {
             this.dom.documentList.innerHTML = `<p style="color:var(--error-color)">Erreur de chargement.</p>`;
             console.error(error);
         }
+    }
+
+    renderDocumentList() {
+        this.dom.documentList.innerHTML = '';
+        if (this.state.documents.length === 0) {
+            this.dom.documentList.innerHTML = '<p data-i18n-key="noDocuments">Aucun document dans la base.</p>';
+            return;
+        }
+
+        this.state.documents.forEach(doc => {
+            const docEl = document.createElement('div');
+            docEl.className = 'document-item';
+            docEl.dataset.id = doc.id;
+            if (this.state.selectedContextIds.has(doc.id)) {
+                docEl.classList.add('active');
+            }
+            docEl.innerHTML = `
+                <span class="document-name" title="${doc.name}">${doc.name}</span>
+                <button class="delete-doc-btn" data-action="delete" title="Supprimer">&times;</button>
+            `;
+            this.dom.documentList.appendChild(docEl);
+        });
+
+        // Update i18n for newly added elements
+        this.updateI18nElements();
     }
 
     handleDocumentClick(event) {
@@ -135,6 +164,11 @@ class QCMResolverApp {
             this.state.selectedContextIds.add(docId);
             docItem.classList.add('active');
         }
+
+        // Hide warning if context is now selected
+        if (this.state.selectedContextIds.size > 0) {
+            this.dom.contextWarning.classList.add('hidden');
+        }
     }
 
     async deleteDocument(docId) {
@@ -148,7 +182,7 @@ class QCMResolverApp {
             alert('Erreur: Impossible de supprimer le document.');
         }
     }
-    
+
     async processDocument(pdfFile) {
         if (!pdfFile) return;
         this.dom.pdfUploadStatus.textContent = this.i18n.t('processingPdf');
@@ -172,10 +206,10 @@ class QCMResolverApp {
     async solveQCM() {
         if (!this.state.qcmFile) return;
         if (this.state.selectedContextIds.size === 0) {
-            this.setUIState('error', "Veuillez sélectionner au moins un document de contexte.");
+            this.showContextWarning();
             return;
         }
-        
+
         this.setUIState('loading', this.i18n.t('solvingQcm'));
         const formData = new FormData();
         formData.append('file', this.state.qcmFile);
@@ -227,6 +261,7 @@ class QCMResolverApp {
         this.state.qcmFile = null;
         this.state.lastResult = null;
         this.dom.qcmInput.value = '';
+        this.dom.contextWarning.classList.add('hidden');
         this.updateQcmFileListUI();
         this.setUIState('form');
     }
@@ -238,6 +273,9 @@ class QCMResolverApp {
                     title: "QCM Resolver", subtitle: "Upload your QCM to find the answer based on the selected context.",
                     pdfDropText: "Add a PDF...", step2Title: "Upload QCM Screenshot",
                     qcmDropText: "Drag & drop an image or <strong>click here</strong>",
+                    contextInstruction: "📋 Click on documents to select them as context",
+                    contextWarning: "⚠️ Please select at least one context document in the sidebar",
+                    noDocuments: "No documents in the database.",
                     processing: "Processing...", processingPdf: "Analyzing document...", solvingQcm: "Finding answer...",
                     error: "Error", retry: "Retry", answerFound: "Answer Found",
                     extractedQuestion: "Extracted Question", suggestedAnswer: "Suggested Answer",
@@ -247,6 +285,9 @@ class QCMResolverApp {
                     title: "QCM Resolver", subtitle: "Uploadez votre QCM pour trouver la réponse basée sur le contexte sélectionné.",
                     pdfDropText: "Ajouter un PDF...", step2Title: "Uploadez la capture du QCM",
                     qcmDropText: "Glissez-déposez une image ou <strong>cliquez ici</strong>",
+                    contextInstruction: "📋 Cliquez sur les documents pour les sélectionner comme contexte",
+                    contextWarning: "⚠️ Veuillez sélectionner au moins un document de contexte dans la sidebar",
+                    noDocuments: "Aucun document dans la base.",
                     processing: "Traitement en cours...", processingPdf: "Analyse du document...", solvingQcm: "Recherche de la réponse...",
                     error: "Erreur", retry: "Réessayer", answerFound: "Réponse Trouvée",
                     extractedQuestion: "Question extraite", suggestedAnswer: "Réponse suggérée",
@@ -258,12 +299,7 @@ class QCMResolverApp {
         this.setLanguage(this.state.lang, true);
     }
 
-    setLanguage(lang, isInitial = false) {
-        if (!lang || (lang === this.state.lang && !isInitial)) return;
-        this.state.lang = lang;
-        document.documentElement.lang = lang;
-        this.dom.langButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.lang === lang));
-        
+    updateI18nElements() {
         const keysWithHtml = ['pdfDropText', 'qcmDropText'];
         document.querySelectorAll('[data-i18n-key]').forEach(el => {
             const key = el.dataset.i18nKey;
@@ -274,6 +310,15 @@ class QCMResolverApp {
                 el.textContent = translation;
             }
         });
+    }
+
+    setLanguage(lang, isInitial = false) {
+        if (!lang || (lang === this.state.lang && !isInitial)) return;
+        this.state.lang = lang;
+        document.documentElement.lang = lang;
+        this.dom.langButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.lang === lang));
+
+        this.updateI18nElements();
 
         if (this.state.lastResult && !this.dom.resultState.classList.contains('hidden')) {
             this.setUIState('success', this.state.lastResult);

@@ -3,6 +3,7 @@ version: '3.8'
 services:
   qcm-resolver:
     build: .
+    image: qcm-resolver:v0
     container_name: qcm-resolver-app
     ports:
       - "8000:8000"

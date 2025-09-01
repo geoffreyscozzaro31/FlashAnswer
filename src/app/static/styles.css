@@ -81,7 +81,6 @@ label { display: block; font-weight: 600; margin-bottom: 1rem; font-size: 1.2rem
 .file-list { margin-top: 1rem; font-size: 0.9rem; color: var(--text-muted-color); }
 .file-item { display: flex; align-items: center; justify-content: space-between; background-color: #2d323d; padding: 0.5rem 1rem; border-radius: 6px; }
 
-/* --- MODIFIÉ/AJOUTÉ: Styles pour les boutons et le séparateur --- */
 .btn {
     width: 100%;
     padding: 0.8rem 1.5rem;
@@ -127,7 +126,6 @@ label { display: block; font-weight: 600; margin-bottom: 1rem; font-size: 1.2rem
     margin: 1.5rem 0;
     font-weight: 600;
 }
-/* --- FIN MODIFICATION --- */
 
 
 .hidden { display: none !important; }

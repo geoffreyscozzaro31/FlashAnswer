@@ -1,17 +1,19 @@
-# requirements.txt
-fastapi
-uvicorn[standard]
-python-dotenv
-PyYAML
-python-multipart
+# Web framework
+fastapi== 0.116.1
+uvicorn[standard]==0.35.0
+python-dotenv==1.1.1
+PyYAML==6.0.2
+python-multipart==0.0.20
 
-# Pour l'OCR et le traitement des PDF/Images
-pymupdf         # Lecture et OCR des PDF
-easyocr     # Moteur OCR
-Pillow          # Manipulation d'images
+# For OCR and PDF/Image processing
+pymupdf==1.26.4
+Pillow==11.3.0
 
-# Pour la logique IA (RAG)
-langchain
-langchain-google-genai
-chromadb        # Base de données vectorielle
-tiktoken        # Pour compter les tokens
+# For AI logic and embeddings
+langchain==0.3.27
+langchain-google-genai==2.1.10
+chromadb==1.0.20  # Vector database
+tiktoken==0.11.0  # Token counting
+
+# For testing
+pytest==8.4.1

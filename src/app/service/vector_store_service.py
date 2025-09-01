@@ -1,7 +1,7 @@
 import chromadb
-from pathlib import Path
+
 from src.app import config
-from collections import defaultdict
+from src.app.logger.logger_configuration import logger
 
 
 class VectorStoreService:
@@ -13,7 +13,7 @@ class VectorStoreService:
         db_path = config.CHROMA_DB_PATH
         self.client = chromadb.PersistentClient(path=str(db_path))
         self.collection = self.client.get_or_create_collection(name=config.VECTOR_STORE_COLLECTION)
-        print("ChromaDB initialized.")
+        logger.info("ChromaDB initialized.")
 
     def add_documents(self, chunks: list[str], embeddings: list[list[float]], metadatas: list[dict], ids: list[str]):
         if self.collection is None:
@@ -40,7 +40,7 @@ class VectorStoreService:
         if self.collection:
             self.client.delete_collection(name=self.collection.name)
             self.collection = self.client.get_or_create_collection(name=config.VECTOR_STORE_COLLECTION)
-            print(f"Collection '{self.collection.name}' cleared.")
+            logger.info(f"Collection '{self.collection.name}' cleared.")
 
     def get_all_documents(self) -> list[dict]:
         """Retrieves a list of unique documents from the collection's metadata."""

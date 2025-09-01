@@ -1,0 +1,31 @@
+# Ignore Docker-related files
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Ignore Git version control directory
+.git
+.gitignore
+
+# Ignore Python virtual environments
+venv
+.venv
+
+# Ignore IDE and editor configuration files
+.idea/
+.vscode/
+
+# Ignore Python cache files and pytest cache
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# CRITICAL: Ignore environment files containing secrets
+.env*
+
+# CRITICAL: Ignore db containing sensitive data
+src/app/db
+
+# Ignore non-essential project files
+README.md
+LICENSE

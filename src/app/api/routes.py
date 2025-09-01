@@ -5,6 +5,7 @@ from typing import List
 
 from fastapi import APIRouter, UploadFile, File, HTTPException, status, Form
 
+from src.app.logger.logger_configuration import logger
 from src.app.service.document_service import process_document_and_embed
 from src.app.service.qcm_vision_service import qcm_vision_analysis_service
 from src.app.service.vector_store_service import vector_store_service
@@ -51,7 +52,7 @@ async def solve_qcm(context_ids: str = Form("[]"), file: UploadFile = File(...))
     except HTTPException as http_exc:
         raise http_exc
     except Exception as e:
-        print(f"An unexpected error occurred: {e}")
+        logger.error(f"An unexpected error occurred: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail=f"An internal error occurred: {e}")
     finally:

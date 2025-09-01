@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  qcm-resolver:
+    build: .
+    image: qcm-resolver:v0
+    container_name: qcm-resolver-app
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/app/src/app/db/chroma
+    env_file:
+      - .env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  chroma_data:
+    driver: local

@@ -1,4 +1,3 @@
-# src/app/config.yaml
 app:
   name: "QCM Resolver"
   version: "1.0.0"
@@ -9,7 +8,26 @@ upload:
 
 llm:
   embedding_model: "models/embedding-001"
-  chat_model: "gemini-1.5-flash"
+  chat_model: "gemini-2.5-flash-lite"
 
 vector_store:
   collection_name: "qcm_documents"
+
+qcm_analysis:
+  vision_model: "gemini-2.5-flash-lite"
+  min_question_length: 10
+  max_options_to_extract: 4
+  rag_chunks_count: 5
+  rag_similarity_threshold: 0.0
+  answer_temperature: 0.0
+  max_context_chars: 5000
+
+logging:
+  log_gemini_responses: true
+  log_rag_chunks: true
+  log_timings: true
+
+prompts:
+  directory: "prompts"
+  vision_extraction_file: "vision_extraction_prompt.txt"
+  answer_generation_file: "answer_generation_prompt.txt"

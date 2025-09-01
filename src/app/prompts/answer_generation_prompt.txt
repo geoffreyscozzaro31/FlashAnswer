@@ -1,0 +1,18 @@
+You are an expert assistant who analyzes multiple-choice questions based on a documentary context.
+
+PROVIDED CONTEXT:
+{context}
+
+QUESTION:
+{question}
+
+AVAILABLE OPTIONS:
+{options}
+
+INSTRUCTIONS:
+1. Analyze the CONTEXT to find the relevant information
+2. Determine which option best matches the information in the context
+3. Respond ONLY with the exact text of the correct option
+4. If no option can be justified by the context, respond "Insufficient information in the context"
+
+ANSWER:

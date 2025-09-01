@@ -1,4 +1,4 @@
-# QCM Resolver - Solve Quizzes with AI
+# FlashAnswer - Solve Quizzes with AI
 
 <!-- Badges: Remplacer les placeholders si nécessaire -->
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)

@@ -81,6 +81,31 @@ label { display: block; font-weight: 600; margin-bottom: 1rem; font-size: 1.2rem
 .file-list { margin-top: 1rem; font-size: 0.9rem; color: var(--text-muted-color); }
 .file-item { display: flex; align-items: center; justify-content: space-between; background-color: #2d323d; padding: 0.5rem 1rem; border-radius: 6px; }
 
+/* --- MODIFIÉ/AJOUTÉ: Styles pour les boutons et le séparateur --- */
+.btn {
+    width: 100%;
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: #1a1d24;
+    border: 1px solid var(--primary-color);
+}
+.btn-primary:hover {
+    background-color: var(--primary-hover-color);
+    border-color: var(--primary-hover-color);
+}
+
 .btn-secondary {
     width: auto;
     padding: 0.8rem 1.5rem;
@@ -95,6 +120,15 @@ label { display: block; font-weight: 600; margin-bottom: 1rem; font-size: 1.2rem
     transition: background-color 0.2s;
 }
 .btn-secondary:hover { background-color: #4b5563; }
+
+.separator {
+    text-align: center;
+    color: var(--text-muted-color);
+    margin: 1.5rem 0;
+    font-weight: 600;
+}
+/* --- FIN MODIFICATION --- */
+
 
 .hidden { display: none !important; }
 

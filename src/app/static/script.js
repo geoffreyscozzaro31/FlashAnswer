@@ -9,6 +9,9 @@ class QCMResolverApp {
         };
         this.cacheDOMElements();
         this.setupEventListeners();
+        if (typeof QCMCapture !== 'undefined') {
+            this.captureModule = new QCMCapture(this);
+        }
         this.initI18n();
         this.fetchAndRenderDocuments();
     }
@@ -280,6 +283,8 @@ class QCMResolverApp {
                     error: "Error", retry: "Retry", answerFound: "Answer Found",
                     extractedQuestion: "Extracted Question", suggestedAnswer: "Suggested Answer",
                     showContext: "Show context used", startOver: "Start Over",
+                    or: "or", // AJOUTÉ
+                    captureScreen: "Capture Screen", // AJOUTÉ
                 },
                 fr: {
                     title: "QCM Resolver", subtitle: "Uploadez votre QCM pour trouver la réponse basée sur le contexte sélectionné.",
@@ -292,6 +297,8 @@ class QCMResolverApp {
                     error: "Erreur", retry: "Réessayer", answerFound: "Réponse Trouvée",
                     extractedQuestion: "Question extraite", suggestedAnswer: "Réponse suggérée",
                     showContext: "Afficher le contexte utilisé", startOver: "Recommencer",
+                    or: "ou", // AJOUTÉ
+                    captureScreen: "Capturer l'écran", // AJOUTÉ
                 }
             },
             t: (key) => this.i18n.translations[this.state.lang][key] || key,

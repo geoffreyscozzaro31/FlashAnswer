@@ -149,55 +149,41 @@ The AI will process the image, find relevant information in your selected docume
 
 You can run this application in a container using Docker, which simplifies setup and ensures a consistent environment.
 
-### Option A: Run the Pre-built Image from Docker Hub (Recommended)
+## Option A: Run the Pre-built Image from Docker Hub (Recommended)
 
-This is the easiest way to get started. You don't need to build the image yourself.
-
-**1. Prerequisites**
+1. **Prerequisites**  
    - [Docker](https://docs.docker.com/get-docker/) installed and running.
 
-**2. Configuration**
-   - Create a `.env` file in a local directory with your Gemini API key:
-     ```
+2. **Configuration**  
+   - Create a `.env` file in your working directory with:  
      GEMINI_API_KEY="YOUR_SECRET_GEMINI_API_KEY"
-     ```
 
-**3. Run the Container**
-   - Open your terminal and run the following command. This will download the image from Docker Hub and start the container.
-     
-     #Todo: Replace `your-dockerhub-username` with your actual Docker Hub username once you've pushed the image.
+3. **Run the Container**  
+   docker run -d -p 8000:8000 --name qcm-resolver-app --env-file .env -v chroma_data:/app/src/app/db/chroma geoffreyscozzaro/qcm-resolver:v0
 
-     ```bash
-     docker run -d \
-       -p 8000:8000 \
-       --name qcm-resolver-app \
-       --env-file .env \
-       -v chroma_data:/app/src/app/db/chroma \
-       your-dockerhub-username/qcm-resolver:latest
-     ```
+4. **Stop the Container**  
+   docker stop qcm-resolver-app
 
-   - **To stop the container:** `docker stop qcm-resolver-app`
-   - **To restart it later:** `docker start qcm-resolver-app`
+5. **Restart the Container**  
+   docker start qcm-resolver-app
 
-### Option B: Build the Image Locally using Docker Compose
+---
 
-Use this option if you want to build the image from the source code.
+## Option B: Build the Image Locally using Docker Compose
 
-**1. Prerequisites**
-   - [Docker](https://docs.docker.com/get-docker/) & [Docker Compose](https://docs.docker.com/compose/install/).
-   - The source code cloned on your machine.
+1. **Prerequisites**  
+   - [Docker](https://docs.docker.com/get-docker/) & [Docker Compose](https://docs.docker.com/compose/install/)  
+   - The source code cloned locally
 
-**2. Configuration**
-   - Ensure you have a `.env` file in the root of the project, as described in the `Getting Started` section.
+2. **Configuration**  
+   - Ensure a `.env` file exists in the root of the project.
 
-**3. Build and Run**
-   - From the project's root directory, run:
-     ```bash
-     docker-compose up --build
-     ```
-   - The `--build` flag is only needed the first time or when you change the source code/dependencies.
+3. **Build and Run**  
+   docker-compose up --build
 
-   - **To stop the application:** Press `Ctrl+C` and then run `docker-compose down`.
+4. **Stop the Application**  
+   Press Ctrl+C and then run:  
+   docker-compose down
 
 ### Accessing the Application
 

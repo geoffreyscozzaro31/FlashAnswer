@@ -1,15 +1,18 @@
-# requirements.txt
+# Web framework
 fastapi
 uvicorn[standard]
 python-dotenv
 PyYAML
 python-multipart
 
-# Pour l'OCR et le traitement des PDF/Images
-pymupdf         # Lecture et OCR des PDF
+# For OCR and PDF/Image processing
+pymupdf
 
-# Pour la logique IA (RAG)
+# For AI logic and embeddings
 langchain
 langchain-google-genai
-chromadb        # Base de données vectorielle
-tiktoken        # Pour compter les tokens
+chromadb  # Vector database
+tiktoken  # Token counting
+
+# For testing
+pytest==8.4.1

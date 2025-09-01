@@ -7,8 +7,9 @@ The application runs entirely on your machine, ensuring your data's privacy.
 ## ✨ Features
 
 -   **Intuitive Web Interface**: A simple, two-step web page to load your knowledge and solve MCQs.
--   **PDF Knowledge Ingestion**: Build a knowledge base by dragging and dropping a single PDF file.
+-   **PDF Knowledge Ingestion**: Build a knowledge base by dragging and dropping PDF files.
 -   **Screenshot-based Solving**: Take a picture of your MCQ, upload it, and let the AI find the answer.
+-   **Built-in Screen Capture**: Capture screenshots directly from the web interface with precision area selection.
 -   **AI-Powered Vision & RAG**: Uses Google Gemini Vision API to extract questions from images and **Retrieval-Augmented Generation (RAG)** to find the most relevant answers in your documents.
 -   **Advanced Text Extraction**: Automatically extracts text from PDFs and analyzes MCQ images using Google Gemini Vision.
 -   **Local & Private**: No data is sent to external servers, except for secure calls to the Gemini API. No user accounts are required.
@@ -31,7 +32,8 @@ QCM_Resolver/
 │   │   ├── static/
 │   │   │   ├── index.html                     # User interface
 │   │   │   ├── script.js                      # Front-end logic
-│   │   │   └── styles.css                     # UI design
+│   │   │   ├── styles.css                     # UI design
+│   │   │   └── capture.js                     # Screen capture functionality
 │   │   ├── utils/
 │   │   │   └── file_utils.py                  # File utility functions
 │   │   ├── .env.example                       # Environment variables template
@@ -52,6 +54,7 @@ Follow these steps to install and run the project on your local machine.
 -   Python 3.10+
 -   `pip` (Python's package manager)
 -   **Google Gemini API Key**: Required for vision analysis and text generation
+-   **Modern Web Browser**: Chrome, Firefox, or Edge with screen capture support
 
 ### 2. Installation
 
@@ -104,13 +107,55 @@ The application is now accessible:
 -   **Web Interface**: [http://127.0.0.1:8000](http://127.0.0.1:8000)
 -   **API Documentation (Swagger UI)**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
+## 📱 Using the Web Interface
+
+### Step 1: Build Your Knowledge Base
+1. **Add PDF Documents**: Drag and drop PDF files into the sidebar or click to browse
+2. **Select Context**: Click on uploaded documents to select them as context for answering questions
+3. **Manage Documents**: Delete documents you no longer need with the × button
+
+### Step 2: Submit Your MCQ
+You have three options to submit a multiple-choice question:
+
+#### Option A: Upload an Image File
+- Drag and drop an image file (PNG, JPG, JPEG) containing your MCQ
+- Or click the upload area to browse for a file
+
+#### Option B: Built-in Screen Capture
+1. **Click "Capturer l'écran" (Capture Screen)** button
+2. **Grant Permission**: Your browser will ask for screen sharing permission
+3. **Select Screen/Window**: Choose which screen or application window to capture
+4. **Select Area**: After capture, an interface will appear showing your screenshot
+5. **Draw Selection**: Click and drag to select the specific area containing your MCQ
+6. **Confirm**: Click "Confirmer" to crop and submit the selected area, or "Annuler" to cancel
+
+#### Option C: Paste from Clipboard
+- Copy an image to your clipboard and paste it directly into the upload area
+
+### Step 3: Get Your Answer
+The application will:
+1. Extract the question text from your image using AI vision
+2. Search through your selected documents for relevant information
+3. Provide the most likely answer based on your knowledge base
+4. Show the context used to determine the answer
+
+## 🔧 Screen Capture Requirements
+
+The built-in screen capture feature requires:
+- **Modern Browser**: Chrome 72+, Firefox 66+, or Edge 79+
+- **HTTPS or Localhost**: Screen capture APIs only work on secure connections
+- **User Permission**: Your browser will prompt for screen sharing permission
+- **Active Content**: The content you want to capture must be visible on screen
+
+**Note**: If screen capture is not supported in your browser, the capture button will be automatically disabled.
+
 ## ⚙️ API Usage
 
 You can interact directly with the API via the Swagger documentation or a tool like `curl`.
 
 ### Endpoint: `POST /api/process-document`
 
-This endpoint processes a PDF file to create the knowledge base. **Note: each call to this endpoint will clear the previous knowledge base.**
+This endpoint processes a PDF file to create the knowledge base.
 
 **Example with `curl`:**
 ```bash
@@ -168,3 +213,17 @@ List all processed documents in the knowledge base.
 
 #### `DELETE /api/documents/{doc_id}`
 Delete a specific document and its embeddings from the knowledge base.
+
+## 🔍 Troubleshooting
+
+### Screen Capture Issues
+- **Permission Denied**: Make sure to allow screen sharing when prompted by your browser
+- **Capture Button Disabled**: Your browser may not support screen capture APIs
+- **Selection Too Small**: Make sure your selection rectangle is at least 10x10 pixels
+- **Blurry Capture**: Ensure your display scaling is set to 100% for best results
+
+### General Issues
+- **API Key Errors**: Verify your `GEMINI_API_KEY` is correctly set in the `.env` file
+- **PDF Processing Fails**: Check that your PDF is not password protected or corrupted
+- **Poor Answer Quality**: Ensure your knowledge base contains relevant information for the questions
+- **Slow Performance**: Large PDFs may take time to process; consider splitting them into smaller section

@@ -24,7 +24,6 @@ async def process_document(file: UploadFile = File(...)):
 
     try:
         temp_path = save_temp_file(file)
-        # Pass the original filename to the service for metadata
         chunk_count = await process_document_and_embed(temp_path, file.filename)
         return {"message": f"Document '{file.filename}' processed successfully. {chunk_count} segments added."}
     except Exception as e:

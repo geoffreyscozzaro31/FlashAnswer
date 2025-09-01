@@ -51,7 +51,7 @@ Follow these steps to install and run the project on your local machine.
 
 ### 1. Prerequisites
 
--   Python 3.10+
+-   Python 3.10+ (recommended: 3.12)
 -   `pip` (Python's package manager)
 -   **Google Gemini API Key**: Required for vision analysis and text generation
 -   **Modern Web Browser**: Chrome, Firefox, or Edge with screen capture support

@@ -1,0 +1,16 @@
+Analyze this QCM image and extract ONLY:
+1. The complete main question
+2. The 4 answer options (A, B, C, D or 1, 2, 3, 4)
+
+STRICT RULES:
+- Completely ignore: headers, footers, page numbers, logos, watermarks, general instructions
+- Ignore introductory/context text before the question if it is not the question itself
+- The question must be complete and understandable
+- Extract exactly 4 options, no more, no less
+- If fewer than 4 options are visible, mark the missing ones as "Missing Option"
+
+OUTPUT FORMAT - Strictly adhere to this JSON:
+{
+  "question": "full text of the question",
+  "options": ["full option A", "full option B", "full option C", "full option D"]
+}

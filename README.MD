@@ -28,6 +28,42 @@ The application runs entirely on your local machine, ensuring your data remains 
 -   **Frontend**: Vanilla HTML, CSS, JavaScript
 -   **Testing**: Pytest
 
+
+## 🏗️ Project Architecture
+
+```
+QCM_Resolver/
+├── src/
+│   ├── app/
+│   │   ├── api/
+│   │   │   └── routes.py                      # Endpoints: /process-document and /solve-qcm
+│   │   ├── db/
+│   │   │   └── chroma/                        # Directory for the ChromaDB database
+│   │   ├── service/
+│   │   │   ├── document_service.py            # PDF text extraction and embedding
+│   │   │   ├── qcm_vision_analysis_service.py # Gemini Vision analysis and RAG logic
+│   │   │   └── vector_store_service.py        # Service to interact with ChromaDB
+│   │   ├── static/
+│   │   │   ├── index.html                     # User interface
+│   │   │   ├── script.js                      # Front-end logic
+│   │   │   ├── styles.css                     # UI design
+│   │   │   └── capture.js                     # Screen capture functionality
+│   │   ├── utils/
+│   │   │   └── file_utils.py                  # File utility functions
+│   │   ├── .env.example                       # Environment variables template
+│   │   ├── app.py                             # FastAPI application entry point
+│   │   ├── config.py                          # Configuration loader
+│   │   └── config.yaml                        # Static parameters (models, etc.)
+│   └── __init__.py
+├── tests/
+│   └── ...
+├── .gitignore
+├── LICENSE
+├── requirements.txt
+└── README.md
+```
+
+
 ## 🚀 Getting Started
 
 Follow these steps to get the project running on your local machine.
@@ -108,6 +144,70 @@ You have three options:
 ### Step 3: Get the Answer
 The AI will process the image, find relevant information in your selected documents, and display the most likely answer along with the context it used.
 
+
+## 🐳 Running with Docker
+
+You can run this application in a container using Docker, which simplifies setup and ensures a consistent environment.
+
+### Option A: Run the Pre-built Image from Docker Hub (Recommended)
+
+This is the easiest way to get started. You don't need to build the image yourself.
+
+**1. Prerequisites**
+   - [Docker](https://docs.docker.com/get-docker/) installed and running.
+
+**2. Configuration**
+   - Create a `.env` file in a local directory with your Gemini API key:
+     ```
+     GEMINI_API_KEY="YOUR_SECRET_GEMINI_API_KEY"
+     ```
+
+**3. Run the Container**
+   - Open your terminal and run the following command. This will download the image from Docker Hub and start the container.
+     
+     #Todo: Replace `your-dockerhub-username` with your actual Docker Hub username once you've pushed the image.
+
+     ```bash
+     docker run -d \
+       -p 8000:8000 \
+       --name qcm-resolver-app \
+       --env-file .env \
+       -v chroma_data:/app/src/app/db/chroma \
+       your-dockerhub-username/qcm-resolver:latest
+     ```
+
+   - **To stop the container:** `docker stop qcm-resolver-app`
+   - **To restart it later:** `docker start qcm-resolver-app`
+
+### Option B: Build the Image Locally using Docker Compose
+
+Use this option if you want to build the image from the source code.
+
+**1. Prerequisites**
+   - [Docker](https://docs.docker.com/get-docker/) & [Docker Compose](https://docs.docker.com/compose/install/).
+   - The source code cloned on your machine.
+
+**2. Configuration**
+   - Ensure you have a `.env` file in the root of the project, as described in the `Getting Started` section.
+
+**3. Build and Run**
+   - From the project's root directory, run:
+     ```bash
+     docker-compose up --build
+     ```
+   - The `--build` flag is only needed the first time or when you change the source code/dependencies.
+
+   - **To stop the application:** Press `Ctrl+C` and then run `docker-compose down`.
+
+### Accessing the Application
+
+For both options, the application will be available at:
+-   **Web Interface**: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+-   **API Docs**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+
+> **Data Persistence**: Your knowledge base is stored in a Docker volume named `chroma_data`. This ensures your uploaded PDFs are saved even if you stop and restart or recreate the container.
+
+
 ## 🤝 Contributing
 
 Contributions make the open-source community an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
@@ -124,39 +224,6 @@ If you have a suggestion that would make this better, please fork the repo and c
 
 Distributed under the MIT License. See `LICENSE` for more information.
 
-## 🏗️ Project Architecture
-
-```
-QCM_Resolver/
-├── src/
-│   ├── app/
-│   │   ├── api/
-│   │   │   └── routes.py                      # Endpoints: /process-document and /solve-qcm
-│   │   ├── db/
-│   │   │   └── chroma/                        # Directory for the ChromaDB database
-│   │   ├── service/
-│   │   │   ├── document_service.py            # PDF text extraction and embedding
-│   │   │   ├── qcm_vision_analysis_service.py # Gemini Vision analysis and RAG logic
-│   │   │   └── vector_store_service.py        # Service to interact with ChromaDB
-│   │   ├── static/
-│   │   │   ├── index.html                     # User interface
-│   │   │   ├── script.js                      # Front-end logic
-│   │   │   ├── styles.css                     # UI design
-│   │   │   └── capture.js                     # Screen capture functionality
-│   │   ├── utils/
-│   │   │   └── file_utils.py                  # File utility functions
-│   │   ├── .env.example                       # Environment variables template
-│   │   ├── app.py                             # FastAPI application entry point
-│   │   ├── config.py                          # Configuration loader
-│   │   └── config.yaml                        # Static parameters (models, etc.)
-│   └── __init__.py
-├── tests/
-│   └── ...
-├── .gitignore
-├── LICENSE
-├── requirements.txt
-└── README.md
-```
 
 ## 🔍 Troubleshooting
 

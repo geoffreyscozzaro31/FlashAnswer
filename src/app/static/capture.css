@@ -1,0 +1,75 @@
+/* Styles for the main capture button */
+#captureBtn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Styles for the cropping interface overlay */
+#qcm-crop-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 10000;
+    cursor: crosshair;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* The captured screenshot image inside the overlay */
+#qcm-crop-overlay .qcm-captured-image {
+    max-width: 90vw;
+    max-height: 80vh;
+    object-fit: contain;
+    border: 2px solid white;
+}
+
+/* The drawing canvas used for selection */
+#qcm-crop-overlay .qcm-selection-canvas {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    cursor: crosshair;
+    max-width: 90vw;
+    max-height: 80vh;
+}
+
+/* Instructional text above the image */
+.qcm-instructions {
+    color: white;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 18px;
+}
+
+/* Container for the confirm/cancel buttons */
+.qcm-button-container {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+/* Base button style for confirm and cancel */
+.qcm-btn {
+    padding: 10px 20px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+/* Specific style for the confirm button */
+.qcm-btn--confirm {
+    background: #007bff;
+}
+
+/* Specific style for the cancel button */
+.qcm-btn--cancel {
+    background: #6c757d;
+}

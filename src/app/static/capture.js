@@ -31,8 +31,8 @@ class QCMCapture {
     disable() {
         this.captureBtn.disabled = true;
         this.captureBtn.title = 'Votre navigateur ne supporte pas cette fonctionnalité.';
-        this.captureBtn.style.opacity = '0.5';
-        this.captureBtn.style.cursor = 'not-allowed';
+        // Add a class to apply disabled styles
+        this.captureBtn.classList.add('disabled');
     }
 
     async startCapture() {
@@ -89,80 +89,29 @@ class QCMCapture {
 
     showCropInterface() {
         this.cropOverlay = document.createElement('div');
-        this.cropOverlay.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 10000;
-            cursor: crosshair;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        `;
+        this.cropOverlay.id = 'qcm-crop-overlay'; // Use ID for styling
 
         const img = document.createElement('img');
         img.src = this.capturedImage;
-        img.style.cssText = `
-            max-width: 90vw;
-            max-height: 80vh;
-            object-fit: contain;
-            border: 2px solid white;
-        `;
+        img.classList.add('qcm-captured-image'); // Use class for styling
 
         const canvas = document.createElement('canvas');
-        canvas.style.cssText = `
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            cursor: crosshair;
-            max-width: 90vw;
-            max-height: 80vh;
-        `;
+        canvas.classList.add('qcm-selection-canvas'); // Use class for styling
 
         const instructions = document.createElement('div');
-        instructions.style.cssText = `
-            color: white;
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 18px;
-        `;
+        instructions.classList.add('qcm-instructions'); // Use class for styling
         instructions.textContent = 'Sélectionnez la zone à capturer en glissant votre souris';
 
         const buttons = document.createElement('div');
-        buttons.style.cssText = `
-            margin-top: 20px;
-            display: flex;
-            gap: 10px;
-        `;
+        buttons.classList.add('qcm-button-container'); // Use class for styling
 
         const confirmBtn = document.createElement('button');
         confirmBtn.textContent = 'Confirmer';
-        confirmBtn.style.cssText = `
-            padding: 10px 20px;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        `;
+        confirmBtn.classList.add('qcm-btn', 'qcm-btn--confirm'); // Use classes for styling
 
         const cancelBtn = document.createElement('button');
         cancelBtn.textContent = 'Annuler';
-        cancelBtn.style.cssText = `
-            padding: 10px 20px;
-            background: #6c757d;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        `;
+        cancelBtn.classList.add('qcm-btn', 'qcm-btn--cancel'); // Use classes for styling
 
         buttons.appendChild(confirmBtn);
         buttons.appendChild(cancelBtn);
@@ -177,6 +126,7 @@ class QCMCapture {
             const rect = img.getBoundingClientRect();
             canvas.width = rect.width;
             canvas.height = rect.height;
+            // These styles are dynamic and must remain in JS
             canvas.style.width = rect.width + 'px';
             canvas.style.height = rect.height + 'px';
 

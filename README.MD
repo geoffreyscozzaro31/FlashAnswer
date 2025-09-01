@@ -191,7 +191,6 @@ For both options, the application will be available at:
 -   **Web Interface**: [http://127.0.0.1:8000](http://127.0.0.1:8000)
 -   **API Docs**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
-> **Data Persistence**: Your knowledge base is stored in a Docker volume named `chroma_data`. This ensures your uploaded PDFs are saved even if you stop and restart or recreate the container.
 
 
 ## 🤝 Contributing

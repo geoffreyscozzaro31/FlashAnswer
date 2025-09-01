@@ -70,7 +70,7 @@ Follow these steps to get the project running on your local machine.
 
 ### 1. Prerequisites
 
--   Python 3.10+ (Recommended: 3.12)
+-   Python 3.10+
 -   `pip` (Python's package manager)
 -   **Google Gemini API Key**: Get one from [Google AI Studio](https://ai.google.dev/).
 -   **Modern Web Browser**: Chrome, Firefox, or Edge.

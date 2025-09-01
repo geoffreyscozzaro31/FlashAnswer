@@ -30,8 +30,7 @@ class QCMCapture {
 
     disable() {
         this.captureBtn.disabled = true;
-        this.captureBtn.title = 'Votre navigateur ne supporte pas cette fonctionnalité.';
-        // Add a class to apply disabled styles
+        this.captureBtn.title = this.app.i18n.t('captureNotSupported');
         this.captureBtn.classList.add('disabled');
     }
 
@@ -44,8 +43,10 @@ class QCMCapture {
             });
 
             const track = stream.getVideoTracks()[0];
+            // Brief delay to ensure the stream is ready
             await new Promise(resolve => setTimeout(resolve, 200));
 
+            // Use ImageCapture API if available (more modern)
             if ('ImageCapture' in window) {
                 const imageCapture = new ImageCapture(track);
                 const bitmap = await imageCapture.grabFrame();
@@ -59,7 +60,7 @@ class QCMCapture {
 
                 this.capturedImage = canvas.toDataURL('image/png');
                 this.showCropInterface();
-            } else {
+            } else { // Fallback for older browsers
                 const video = document.createElement('video');
                 video.srcObject = stream;
                 video.play();
@@ -78,40 +79,44 @@ class QCMCapture {
             }
 
         } catch (err) {
-            console.error("Erreur durant la capture d'écran :", err);
+            console.error(this.app.i18n.t('captureGenericErrorLog'), err);
+            // Use translation keys for user-facing error messages
             if (err.name === 'NotAllowedError') {
-                this.app.setUIState('error', "La permission de capturer l'écran a été refusée.");
+                this.app.setUIState('error', this.app.i18n.t('capturePermissionDenied'));
             } else {
-                this.app.setUIState('error', `Erreur de capture : ${err.message}`);
+                this.app.setUIState('error', this.app.i18n.t('captureErrorWithMessage', { message: err.message }));
             }
         }
     }
 
     showCropInterface() {
         this.cropOverlay = document.createElement('div');
-        this.cropOverlay.id = 'qcm-crop-overlay'; // Use ID for styling
+        this.cropOverlay.id = 'qcm-crop-overlay';
 
         const img = document.createElement('img');
         img.src = this.capturedImage;
-        img.classList.add('qcm-captured-image'); // Use class for styling
+        img.classList.add('qcm-captured-image');
 
         const canvas = document.createElement('canvas');
-        canvas.classList.add('qcm-selection-canvas'); // Use class for styling
+        canvas.classList.add('qcm-selection-canvas');
 
         const instructions = document.createElement('div');
-        instructions.classList.add('qcm-instructions'); // Use class for styling
-        instructions.textContent = 'Sélectionnez la zone à capturer en glissant votre souris';
+        instructions.classList.add('qcm-instructions');
+        // Use translation key for instructions
+        instructions.textContent = this.app.i18n.t('captureInstructions');
 
         const buttons = document.createElement('div');
-        buttons.classList.add('qcm-button-container'); // Use class for styling
+        buttons.classList.add('qcm-button-container');
 
         const confirmBtn = document.createElement('button');
-        confirmBtn.textContent = 'Confirmer';
-        confirmBtn.classList.add('qcm-btn', 'qcm-btn--confirm'); // Use classes for styling
+        // Use translation key for button text
+        confirmBtn.textContent = this.app.i18n.t('confirm');
+        confirmBtn.classList.add('qcm-btn', 'qcm-btn--confirm');
 
         const cancelBtn = document.createElement('button');
-        cancelBtn.textContent = 'Annuler';
-        cancelBtn.classList.add('qcm-btn', 'qcm-btn--cancel'); // Use classes for styling
+        // Use translation key for button text
+        cancelBtn.textContent = this.app.i18n.t('cancel');
+        cancelBtn.classList.add('qcm-btn', 'qcm-btn--cancel');
 
         buttons.appendChild(confirmBtn);
         buttons.appendChild(cancelBtn);
@@ -126,69 +131,89 @@ class QCMCapture {
             const rect = img.getBoundingClientRect();
             canvas.width = rect.width;
             canvas.height = rect.height;
-            // These styles are dynamic and must remain in JS
-            canvas.style.width = rect.width + 'px';
-            canvas.style.height = rect.height + 'px';
+            canvas.style.width = `${rect.width}px`;
+            canvas.style.height = `${rect.height}px`;
 
-            this.setupCanvasEvents(canvas, img);
+            this.setupCanvasEvents(canvas);
         };
 
-        confirmBtn.onclick = () => this.confirmSelection(canvas, img);
+        confirmBtn.onclick = () => this.confirmSelection(img);
         cancelBtn.onclick = () => this.closeCropInterface();
     }
 
-    setupCanvasEvents(canvas, img) {
+    setupCanvasEvents(canvas) {
         const ctx = canvas.getContext('2d');
         let isDrawing = false;
 
-        canvas.onmousedown = (e) => {
-            isDrawing = true;
+        const getCoords = (e) => {
             const rect = canvas.getBoundingClientRect();
-            this.selection.startX = e.clientX - rect.left;
-            this.selection.startY = e.clientY - rect.top;
+            return {
+                x: (e.touches ? e.touches[0].clientX : e.clientX) - rect.left,
+                y: (e.touches ? e.touches[0].clientY : e.clientY) - rect.top,
+            };
         };
 
-        canvas.onmousemove = (e) => {
-            if (!isDrawing) return;
+        const startDraw = (e) => {
+            isDrawing = true;
+            const { x, y } = getCoords(e);
+            this.selection.startX = x;
+            this.selection.startY = y;
+        };
 
-            const rect = canvas.getBoundingClientRect();
-            this.selection.endX = e.clientX - rect.left;
-            this.selection.endY = e.clientY - rect.top;
+        const draw = (e) => {
+            if (!isDrawing) return;
+            e.preventDefault();
+
+            const { x, y } = getCoords(e);
+            this.selection.endX = x;
+            this.selection.endY = y;
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            const x = Math.min(this.selection.startX, this.selection.endX);
-            const y = Math.min(this.selection.startY, this.selection.endY);
-            const w = Math.abs(this.selection.endX - this.selection.startX);
-            const h = Math.abs(this.selection.endY - this.selection.startY);
+            const selX = Math.min(this.selection.startX, this.selection.endX);
+            const selY = Math.min(this.selection.startY, this.selection.endY);
+            const selW = Math.abs(this.selection.endX - this.selection.startX);
+            const selH = Math.abs(this.selection.endY - this.selection.startY);
 
             ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.clearRect(x, y, w, h);
+            ctx.clearRect(selX, selY, selW, selH);
             ctx.strokeStyle = '#ff0000';
             ctx.lineWidth = 2;
-            ctx.strokeRect(x, y, w, h);
+            ctx.strokeRect(selX, selY, selW, selH);
         };
 
-        canvas.onmouseup = () => {
+        const stopDraw = () => {
             isDrawing = false;
         };
+
+        // Mouse events
+        canvas.onmousedown = startDraw;
+        canvas.onmousemove = draw;
+        canvas.onmouseup = stopDraw;
+        canvas.onmouseleave = stopDraw; // Stop if mouse leaves canvas
+
+        // Touch events
+        canvas.ontouchstart = startDraw;
+        canvas.ontouchmove = draw;
+        canvas.ontouchend = stopDraw;
     }
 
-    confirmSelection(canvas, img) {
-        const x = Math.min(this.selection.startX, this.selection.endX);
-        const y = Math.min(this.selection.startY, this.selection.endY);
+
+    confirmSelection(img) {
         const w = Math.abs(this.selection.endX - this.selection.startX);
         const h = Math.abs(this.selection.endY - this.selection.startY);
 
         if (w < 10 || h < 10) {
-            alert('Sélection trop petite');
+            // Use translation key for the alert
+            alert(this.app.i18n.t('selectionTooSmall'));
             return;
         }
 
+        const x = Math.min(this.selection.startX, this.selection.endX);
+        const y = Math.min(this.selection.startY, this.selection.endY);
+
         const cropCanvas = document.createElement('canvas');
         const cropCtx = cropCanvas.getContext('2d');
-
         const scaleX = img.naturalWidth / img.getBoundingClientRect().width;
         const scaleY = img.naturalHeight / img.getBoundingClientRect().height;
 

@@ -1,21 +1,20 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QCM Resolver</title>
+    <title data-i18n-key="pageTitle">QCM Resolver</title>
     <link rel="stylesheet" href="/static/styles.css">
     <link rel="stylesheet" href="/static/capture.css">
     <script src="/static/script.js" defer></script>
-    <script src="/static/capture.js" defer></script> <!-- AJOUTÉ: Nouveau script de capture -->
+    <script src="/static/capture.js" defer></script>
 </head>
 <body>
     <div class="app-layout">
-        <!-- Sidebar for Context Management -->
         <aside id="contextSidebar" class="sidebar">
             <div class="sidebar-header">
-                <h3>Base de Connaissances</h3>
-                <p>Ajoutez ou sélectionnez des documents à utiliser.</p>
+                <h3 data-i18n-key="sidebarTitle">Base de Connaissances</h3>
+                <p data-i18n-key="sidebarSubtitle">Ajoutez ou sélectionnez des documents à utiliser.</p>
             </div>
             <div class="sidebar-content">
                 <div class="form-group">
@@ -31,12 +30,10 @@
                 </div>
                 <hr>
                 <div id="documentList">
-                    <!-- Loaded documents will appear here -->
-                </div>
+                    </div>
             </div>
         </aside>
 
-        <!-- Main Content Area -->
         <main class="main-content">
             <header>
                 <div class="header-content">
@@ -45,8 +42,8 @@
                         <p data-i18n-key="subtitle">Uploadez votre QCM pour trouver la réponse basée sur le contexte sélectionné.</p>
                     </div>
                     <div class="lang-switcher">
-                        <button class="lang-btn active" data-lang="fr" title="Français">🇫🇷</button>
-                        <button class="lang-btn" data-lang="en" title="English">🇬🇧</button>
+                        <button class="lang-btn" data-lang="fr" title="Français">🇫🇷</button>
+                        <button class="lang-btn active" data-lang="en" title="English">🇬🇧</button>
                     </div>
                 </div>
             </header>
@@ -73,7 +70,6 @@
             </div>
 
             <section id="resultsSection" class="hidden">
-                 <!-- The states (loading, error, result) remain the same -->
                  <div id="loadingState" class="card hidden">
                     <div class="spinner"></div>
                     <p data-i18n-key="processing">Génération en cours...</p>

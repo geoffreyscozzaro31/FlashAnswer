@@ -1,7 +1,8 @@
 class QCMResolverApp {
     constructor() {
+        // Default language set to English
         this.state = {
-            lang: 'fr',
+            lang: 'en',
             qcmFile: null,
             lastResult: null,
             documents: [],
@@ -18,6 +19,7 @@ class QCMResolverApp {
 
     cacheDOMElements() {
         this.dom = {
+            pageTitle: document.querySelector('title'),
             qcmCard: document.getElementById('qcmCard'),
             resultsSection: document.getElementById('resultsSection'),
             loadingState: document.getElementById('loadingState'),
@@ -39,6 +41,7 @@ class QCMResolverApp {
             langButtons: document.querySelectorAll('.lang-btn'),
             resetBtn: document.getElementById('resetBtn'),
             startOverBtn: document.getElementById('startOverBtn'),
+            captureBtn: document.getElementById('captureBtn'),
         };
     }
 
@@ -64,7 +67,6 @@ class QCMResolverApp {
         zone.addEventListener('dragover', e => {
             e.preventDefault();
             if (type === 'qcm' && this.state.selectedContextIds.size === 0) {
-                this.showContextWarning();
                 return;
             }
             zone.classList.add('dragover');
@@ -120,7 +122,7 @@ class QCMResolverApp {
             this.state.documents = await response.json();
             this.renderDocumentList();
         } catch (error) {
-            this.dom.documentList.innerHTML = `<p style="color:var(--error-color)">Erreur de chargement.</p>`;
+            this.dom.documentList.innerHTML = `<p style="color:var(--error-color)">${this.i18n.t('loadingError')}</p>`;
             console.error(error);
         }
     }
@@ -128,7 +130,7 @@ class QCMResolverApp {
     renderDocumentList() {
         this.dom.documentList.innerHTML = '';
         if (this.state.documents.length === 0) {
-            this.dom.documentList.innerHTML = '<p data-i18n-key="noDocuments">Aucun document dans la base.</p>';
+            this.dom.documentList.innerHTML = `<p data-i18n-key="noDocuments">${this.i18n.t('noDocuments')}</p>`;
             return;
         }
 
@@ -141,13 +143,10 @@ class QCMResolverApp {
             }
             docEl.innerHTML = `
                 <span class="document-name" title="${doc.name}">${doc.name}</span>
-                <button class="delete-doc-btn" data-action="delete" title="Supprimer">&times;</button>
+                <button class="delete-doc-btn" data-action="delete" title="${this.i18n.t('deleteTooltip')}">&times;</button>
             `;
             this.dom.documentList.appendChild(docEl);
         });
-
-        // Update i18n for newly added elements
-        this.updateI18nElements();
     }
 
     handleDocumentClick(event) {
@@ -160,29 +159,27 @@ class QCMResolverApp {
             return;
         }
 
+        docItem.classList.toggle('active');
         if (this.state.selectedContextIds.has(docId)) {
             this.state.selectedContextIds.delete(docId);
-            docItem.classList.remove('active');
         } else {
             this.state.selectedContextIds.add(docId);
-            docItem.classList.add('active');
         }
 
-        // Hide warning if context is now selected
         if (this.state.selectedContextIds.size > 0) {
             this.dom.contextWarning.classList.add('hidden');
         }
     }
 
     async deleteDocument(docId) {
-        if (!confirm('Êtes-vous sûr de vouloir supprimer ce document ?')) return;
+        if (!confirm(this.i18n.t('deleteConfirm'))) return;
         try {
             const response = await fetch(`/api/documents/${docId}`, { method: 'DELETE' });
             if (!response.ok) throw new Error('Server error during deletion.');
             this.state.selectedContextIds.delete(docId);
             await this.fetchAndRenderDocuments();
         } catch (error) {
-            alert('Erreur: Impossible de supprimer le document.');
+            alert(this.i18n.t('alertError'));
         }
     }
 
@@ -198,11 +195,11 @@ class QCMResolverApp {
                 const err = await response.json();
                 throw new Error(err.detail || 'Server error');
             }
-            this.dom.pdfUploadStatus.textContent = `"${pdfFile.name}" ajouté.`;
+            this.dom.pdfUploadStatus.textContent = this.i18n.t('pdfAdded', { fileName: pdfFile.name });
             setTimeout(() => this.dom.pdfUploadStatus.textContent = '', 3000);
             await this.fetchAndRenderDocuments();
         } catch (error) {
-            this.dom.pdfUploadStatus.textContent = `Erreur: ${error.message}`;
+            this.dom.pdfUploadStatus.textContent = this.i18n.t('pdfError', { errorMessage: error.message });
         }
     }
 
@@ -233,9 +230,7 @@ class QCMResolverApp {
     setUIState(state, data = null) {
         this.dom.qcmCard.classList.add('hidden');
         this.dom.resultsSection.classList.remove('hidden');
-        this.dom.loadingState.classList.add('hidden');
-        this.dom.errorState.classList.add('hidden');
-        this.dom.resultState.classList.add('hidden');
+        [this.dom.loadingState, this.dom.errorState, this.dom.resultState].forEach(el => el.classList.add('hidden'));
 
         switch (state) {
             case 'loading':
@@ -264,7 +259,6 @@ class QCMResolverApp {
         this.state.qcmFile = null;
         this.state.lastResult = null;
         this.dom.qcmInput.value = '';
-        this.dom.contextWarning.classList.add('hidden');
         this.updateQcmFileListUI();
         this.setUIState('form');
     }
@@ -273,35 +267,97 @@ class QCMResolverApp {
         this.i18n = {
             translations: {
                 en: {
-                    title: "QCM Resolver", subtitle: "Upload your QCM to find the answer based on the selected context.",
-                    pdfDropText: "Add a PDF...", step2Title: "Upload QCM Screenshot",
-                    qcmDropText: "Drag & drop an image or <strong>click here</strong>",
+                    // Main App
+                    pageTitle: "QCM Resolver",
+                    sidebarTitle: "Knowledge Base",
+                    sidebarSubtitle: "Add or select documents to use.",
+                    title: "QCM Resolver",
+                    subtitle: "Upload your QCM to find the answer based on the selected context.",
+                    pdfDropText: "Add a PDF...",
                     contextInstruction: "📋 Click on documents to select them as context",
-                    contextWarning: "⚠️ Please select at least one context document in the sidebar",
+                    step2Title: "Upload QCM Screenshot",
+                    contextWarning: "⚠️ Please select at least one context document from the sidebar",
+                    qcmDropText: "Drag & drop an image or <strong>click here</strong>",
+                    or: "or",
+                    captureScreen: "Capture Screen",
                     noDocuments: "No documents in the database.",
-                    processing: "Processing...", processingPdf: "Analyzing document...", solvingQcm: "Finding answer...",
-                    error: "Error", retry: "Retry", answerFound: "Answer Found",
-                    extractedQuestion: "Extracted Question", suggestedAnswer: "Suggested Answer",
-                    showContext: "Show context used", startOver: "Start Over",
-                    or: "or", // AJOUTÉ
-                    captureScreen: "Capture Screen", // AJOUTÉ
+                    processing: "Processing...",
+                    processingPdf: "Analyzing document...",
+                    solvingQcm: "Finding answer...",
+                    error: "Error",
+                    retry: "Retry",
+                    answerFound: "Answer Found",
+                    extractedQuestion: "Extracted Question:",
+                    suggestedAnswer: "Suggested Answer:",
+                    showContext: "Show context used",
+                    startOver: "Start Over",
+                    deleteConfirm: "Are you sure you want to delete this document?",
+                    deleteTooltip: "Delete",
+                    loadingError: "Error loading documents.",
+                    pdfAdded: '"{{fileName}}" added.',
+                    pdfError: "Error: {{errorMessage}}",
+                    alertError: "Error: Could not delete the document.",
+
+                    // Capture Module
+                    captureNotSupported: "Your browser does not support this feature.",
+                    captureGenericErrorLog: "Error during screen capture:",
+                    capturePermissionDenied: "Permission to capture the screen was denied.",
+                    captureErrorWithMessage: "Capture error: {{message}}",
+                    captureInstructions: "Select the area to capture by dragging your mouse",
+                    confirm: "Confirm",
+                    cancel: "Cancel",
+                    selectionTooSmall: "Selection is too small",
                 },
                 fr: {
-                    title: "QCM Resolver", subtitle: "Uploadez votre QCM pour trouver la réponse basée sur le contexte sélectionné.",
-                    pdfDropText: "Ajouter un PDF...", step2Title: "Uploadez la capture du QCM",
-                    qcmDropText: "Glissez-déposez une image ou <strong>cliquez ici</strong>",
+                    // Main App
+                    pageTitle: "QCM Resolver",
+                    sidebarTitle: "Base de Connaissances",
+                    sidebarSubtitle: "Ajoutez ou sélectionnez des documents à utiliser.",
+                    title: "QCM Resolver",
+                    subtitle: "Uploadez votre QCM pour trouver la réponse basée sur le contexte sélectionné.",
+                    pdfDropText: "Ajouter un PDF...",
                     contextInstruction: "📋 Cliquez sur les documents pour les sélectionner comme contexte",
-                    contextWarning: "⚠️ Veuillez sélectionner au moins un document de contexte dans la sidebar",
+                    step2Title: "Uploadez la capture du QCM",
+                    contextWarning: "⚠️ Veuillez sélectionner au moins un document de contexte dans la barre latérale",
+                    qcmDropText: "Glissez-déposez une image ou <strong>cliquez ici</strong>",
+                    or: "ou",
+                    captureScreen: "Capturer l'écran",
                     noDocuments: "Aucun document dans la base.",
-                    processing: "Traitement en cours...", processingPdf: "Analyse du document...", solvingQcm: "Recherche de la réponse...",
-                    error: "Erreur", retry: "Réessayer", answerFound: "Réponse Trouvée",
-                    extractedQuestion: "Question extraite", suggestedAnswer: "Réponse suggérée",
-                    showContext: "Afficher le contexte utilisé", startOver: "Recommencer",
-                    or: "ou", // AJOUTÉ
-                    captureScreen: "Capturer l'écran", // AJOUTÉ
+                    processing: "Traitement en cours...",
+                    processingPdf: "Analyse du document...",
+                    solvingQcm: "Recherche de la réponse...",
+                    error: "Erreur",
+                    retry: "Réessayer",
+                    answerFound: "Réponse Trouvée",
+                    extractedQuestion: "Question extraite :",
+                    suggestedAnswer: "Réponse suggérée :",
+                    showContext: "Afficher le contexte utilisé",
+                    startOver: "Recommencer",
+                    deleteConfirm: "Êtes-vous sûr de vouloir supprimer ce document ?",
+                    deleteTooltip: "Supprimer",
+                    loadingError: "Erreur de chargement des documents.",
+                    pdfAdded: '"{{fileName}}" ajouté.',
+                    pdfError: "Erreur : {{errorMessage}}",
+                    alertError: "Erreur: Impossible de supprimer le document.",
+
+                    // Capture Module
+                    captureNotSupported: "Votre navigateur ne supporte pas cette fonctionnalité.",
+                    captureGenericErrorLog: "Erreur durant la capture d'écran :",
+                    capturePermissionDenied: "La permission de capturer l'écran a été refusée.",
+                    captureErrorWithMessage: "Erreur de capture : {{message}}",
+                    captureInstructions: "Sélectionnez la zone à capturer en glissant votre souris",
+                    confirm: "Confirmer",
+                    cancel: "Annuler",
+                    selectionTooSmall: "Sélection trop petite",
                 }
             },
-            t: (key) => this.i18n.translations[this.state.lang][key] || key,
+            t: (key, replacements = {}) => {
+                let translation = this.i18n.translations[this.state.lang]?.[key] || key;
+                for (const placeholder in replacements) {
+                    translation = translation.replace(`{{${placeholder}}}`, replacements[placeholder]);
+                }
+                return translation;
+            },
         };
         this.setLanguage(this.state.lang, true);
     }
@@ -326,6 +382,10 @@ class QCMResolverApp {
         this.dom.langButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.lang === lang));
 
         this.updateI18nElements();
+
+        if (this.state.documents.length > 0) {
+            this.renderDocumentList();
+        }
 
         if (this.state.lastResult && !this.dom.resultState.classList.contains('hidden')) {
             this.setUIState('success', this.state.lastResult);

@@ -2,14 +2,14 @@
 export const translations = {
     en: {
                     // Main App
-                    pageTitle: "QCM Resolver",
+                    pageTitle: "FlashAnswer",
                     sidebarTitle: "Knowledge Base",
                     sidebarSubtitle: "Add or select documents to use.",
-                    title: "QCM Resolver",
-                    subtitle: "Upload your QCM to find the answer based on the selected context.",
+                    title: "FlashAnswer",
+                    subtitle: "Upload your MCQ to find the answer based on the selected context.",
                     pdfDropText: "Add a PDF...",
                     contextInstruction: "📋 Click on documents to select them as context",
-                    step2Title: "Upload QCM Screenshot",
+                    step2Title: "Upload MCQ Screenshot",
                     contextWarning: "⚠️ Please select at least one context document from the sidebar",
                     qcmDropText: "Drag & drop an image or <strong>click here</strong>",
                     or: "or",
@@ -43,10 +43,10 @@ export const translations = {
                     selectionTooSmall: "Selection is too small",
     },
     fr: {
- pageTitle: "QCM Resolver",
+ pageTitle: "FlashAnswer",
                     sidebarTitle: "Base de Connaissances",
                     sidebarSubtitle: "Ajoutez ou sélectionnez des documents à utiliser.",
-                    title: "QCM Resolver",
+                    title: "FlashAnswer",
                     subtitle: "Uploadez votre QCM pour trouver la réponse basée sur le contexte sélectionné.",
                     pdfDropText: "Ajouter un PDF...",
                     contextInstruction: "📋 Cliquez sur les documents pour les sélectionner comme contexte",

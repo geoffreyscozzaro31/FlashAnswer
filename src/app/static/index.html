@@ -4,102 +4,120 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title data-i18n-key="pageTitle">QCM Resolver</title>
-    <link rel="stylesheet" href="/static/styles.css">
-    <link rel="stylesheet" href="/static/capture.css">
-    <script src="/static/script.js" defer></script>
-    <script src="/static/capture.js" defer></script>
+    <link rel="stylesheet" href="/static/css/main.css">
 </head>
 <body>
     <div class="app-layout">
-        <aside id="contextSidebar" class="sidebar">
-            <div class="sidebar-header">
-                <h3 data-i18n-key="sidebarTitle">Base de Connaissances</h3>
-                <p data-i18n-key="sidebarSubtitle">Ajoutez ou sélectionnez des documents à utiliser.</p>
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar__header">
+                <h3 data-i18n-key="sidebarTitle">Knowledge Base</h3>
+                <p data-i18n-key="sidebarSubtitle">Add or select documents to use.</p>
             </div>
-            <div class="sidebar-content">
+            <div class="sidebar__content">
                 <div class="form-group">
                     <div id="pdfDropZone" class="drop-zone" tabindex="0">
                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                        <p data-i18n-key="pdfDropText">Ajouter un PDF...</p>
+                        <p data-i18n-key="pdfDropText">Add a PDF...</p>
                     </div>
                     <input type="file" id="pdfInput" accept=".pdf" hidden>
                     <div id="pdfUploadStatus" class="file-list"></div>
                     <div class="context-instruction">
-                        <p data-i18n-key="contextInstruction">📋 Cliquez sur les documents pour les sélectionner comme contexte</p>
+                        <p data-i18n-key="contextInstruction">📋 Click on documents to select them as context</p>
                     </div>
                 </div>
                 <hr>
-                <div id="documentList">
-                    </div>
+                <div id="documentList"></div>
             </div>
         </aside>
 
+        <!-- Main Content -->
         <main class="main-content">
-            <header>
-                <div class="header-content">
-                    <div class="title-group">
-                        <h1 data-i18n-key="title">QCM Resolver</h1>
-                        <p data-i18n-key="subtitle">Uploadez votre QCM pour trouver la réponse basée sur le contexte sélectionné.</p>
+            <header class="header">
+                <div class="header__content">
+                    <div class="header__title-group">
+                        <h1 data-i18n-key="title">Flash Answer</h1>
+                        <p data-i18n-key="subtitle">Upload your MCQ to find the answer based on the selected context.</p>
                     </div>
                     <div class="lang-switcher">
-                        <button class="lang-btn" data-lang="fr" title="Français">🇫🇷</button>
-                        <button class="lang-btn active" data-lang="en" title="English">🇬🇧</button>
+                        <button class="lang-switcher__btn" data-lang="fr" title="Français">
+                            <svg width="30" height="20" viewBox="0 0 3 2" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="1" height="2" fill="#0055A4"/>
+                                <rect x="1" width="1" height="2" fill="#FFFFFF"/>
+                                <rect x="2" width="1" height="2" fill="#EF4135"/>
+                            </svg>
+                        </button>
+                        <button class="lang-switcher__btn" data-lang="en" title="English">
+                            <svg width="30" height="20" viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="60" height="30" fill="#012169"/>
+                                <g stroke="#FFF">
+                                    <path stroke-width="6" d="m0,0 60,30 m0,-30 L0,30"/>
+                                    <path stroke-width="4" d="m0,0 60,30 m0,-30 L0,30"/>
+                                </g>
+                                <g stroke="#C8102E">
+                                    <path stroke-width="2" d="m0,0 60,30 m0,-30 L0,30"/>
+                                </g>
+                                <path stroke="#FFF" stroke-width="10" d="M30,0 v30 M0,15 h60"/>
+                                <path stroke="#C8102E" stroke-width="6" d="M30,0 v30 M0,15 h60"/>
+                            </svg>
+                        </button>
                     </div>
                 </div>
             </header>
 
+            <!-- QCM Upload Card -->
             <div id="qcmCard" class="card">
                 <div class="form-group">
-                    <label data-i18n-key="step2Title">Uploadez la capture du QCM</label>
-                    <div id="contextWarning" class="warning-message hidden">
-                        <p data-i18n-key="contextWarning">⚠️ Veuillez sélectionner au moins un document de contexte dans la sidebar</p>
+                    <label data-i18n-key="step2Title">Upload MCQ Screenshot</label>
+                    <div id="contextWarning" class="warning-message--hidden">
+                        <p data-i18n-key="contextWarning">⚠️ Please select at least one context document</p>
                     </div>
                     <div id="qcmDropZone" class="drop-zone" tabindex="0">
                         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                        <p data-i18n-key="qcmDropText">Glissez-déposez une image ou <strong>cliquez ici</strong></p>
+                        <p data-i18n-key="qcmDropText">Drag & drop an image or <strong>click here</strong></p>
                     </div>
                     <input type="file" id="qcmInput" accept="image/*" hidden>
                     <div id="qcmFileList" class="file-list"></div>
-
-                    <div class="separator" data-i18n-key="or">ou</div>
-                    <button id="captureBtn" class="btn btn-primary">
+                    <div class="separator" data-i18n-key="or">or</div>
+                    <button id="captureBtn" class="button button--primary">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                        <span data-i18n-key="captureScreen">Capturer l'écran</span>
+                        <span data-i18n-key="captureScreen">Capture Screen</span>
                     </button>
                 </div>
             </div>
 
-            <section id="resultsSection" class="hidden">
-                 <div id="loadingState" class="card hidden">
+            <!-- Results Section -->
+            <section id="resultsSection" class="results--hidden">
+                 <div id="loadingState" class="card card--hidden">
                     <div class="spinner"></div>
-                    <p data-i18n-key="processing">Génération en cours...</p>
+                    <p data-i18n-key="processing">Processing...</p>
                     <span id="loadingMessage"></span>
                 </div>
-
-                <div id="errorState" class="card error-card hidden">
-                    <h3 data-i18n-key="error">Erreur</h3>
+                <div id="errorState" class="card card--error card--hidden">
+                    <h3 data-i18n-key="error">Error</h3>
                     <p id="errorMessage"></p>
-                    <button id="resetBtn" class="btn-secondary" data-i18n-key="retry">Réessayer</button>
+                    <button id="resetBtn" class="button button--secondary" data-i18n-key="retry">Retry</button>
                 </div>
-
-                <div id="resultState" class="card hidden">
-                    <h2 data-i18n-key="answerFound">Réponse trouvée</h2>
+                <div id="resultState" class="card card--hidden">
+                    <h2 data-i18n-key="answerFound">Answer Found</h2>
                     <div class="result-item">
-                        <strong data-i18n-key="extractedQuestion">Question extraite :</strong>
+                        <strong data-i18n-key="extractedQuestion">Extracted Question:</strong>
                         <p id="resultQuestion"></p>
                     </div>
                     <div class="result-item">
-                        <strong data-i18n-key="suggestedAnswer">Réponse suggérée :</strong>
+                        <strong data-i18n-key="suggestedAnswer">Suggested Answer:</strong>
                         <mark id="resultAnswer"></mark>
                     </div>
                     <details>
-                        <summary data-i18n-key="showContext">Afficher le contexte utilisé</summary>
+                        <summary data-i18n-key="showContext">Show context used</summary>
                         <pre><code id="resultContext"></code></pre>
                     </details>
-                    <button id="startOverBtn" class="btn-secondary" data-i18n-key="startOver">Recommencer</button>
+                    <button id="startOverBtn" class="button button--secondary" data-i18n-key="startOver">Start Over</button>
                 </div>
             </section>
         </main>
     </div>
+    <!-- The main entry point for the application -->
+    <script src="/static/js/main.js" type="module"></script>
 </body>
 </html>

@@ -1,4 +1,3 @@
-// src/app/static/js/ui/qcmCard.js
 import { Capture } from './capture.js';
 
 export class QCMCard {
@@ -20,30 +19,38 @@ export class QCMCard {
             warning: document.getElementById('contextWarning'),
             captureBtn: document.getElementById('captureBtn'),
             langButtons: document.querySelectorAll('.lang-switcher__btn'),
+
+            // Live capture elements
+            liveCaptureControls: document.getElementById('liveCaptureControls'),
+            findAnswerLiveBtn: document.getElementById('findAnswerLiveBtn'),
+            stopCaptureBtn: document.getElementById('stopCaptureBtn'),
+            uploadGroup: [ // Elements to hide during live capture
+                document.getElementById('qcmDropZone'),
+                document.querySelector('.separator'),
+                document.getElementById('captureBtn')
+            ]
         };
     }
 
     setupEventListeners() {
+        // Standard file upload
         this.dom.dropZone.addEventListener('click', () => this.triggerInputClick());
         this.dom.input.addEventListener('change', e => this.handleFileSelect(e.target.files[0]));
-        // Drag and drop events...
 
-        this.dom.captureBtn.addEventListener('click', async () => {
-            if (this.stateManager.getState().selectedContextIds.size === 0) {
-                this.showContextWarning();
-                return;
-            }
-            const file = await this.captureModule.startCapture();
-            if (file) {
-                this.handleFileSelect(file);
-            }
-        });
-
+        // Language switcher
         this.dom.langButtons.forEach(btn => {
             btn.addEventListener('click', () => {
                 document.dispatchEvent(new CustomEvent('languageChange', { detail: { lang: btn.dataset.lang } }));
             });
         });
+
+        // Live Capture events
+        this.dom.captureBtn.addEventListener('click', () => this.startLiveCapture());
+        this.dom.findAnswerLiveBtn.addEventListener('click', () => this.solveFromLiveCapture());
+        this.dom.stopCaptureBtn.addEventListener('click', () => this.captureModule.stopCapture());
+
+        // Listen for state changes from the capture module
+        document.addEventListener('captureStateChange', (e) => this.onCaptureStateChange(e.detail));
     }
 
     triggerInputClick() {
@@ -58,6 +65,29 @@ export class QCMCard {
         if (!file) return;
         this.updateFileListUI(file);
         document.dispatchEvent(new CustomEvent('qcmFileSelected', { detail: { file } }));
+    }
+
+    async startLiveCapture() {
+        if (this.stateManager.getState().selectedContextIds.size === 0) {
+            this.showContextWarning();
+            return;
+        }
+        await this.captureModule.startCapture();
+    }
+
+    solveFromLiveCapture() {
+        const file = this.captureModule.getLatestCapture();
+        if (file) {
+            this.handleFileSelect(file);
+        } else {
+            console.warn("No capture available to send.");
+            // Optionally, provide user feedback here
+        }
+    }
+
+    onCaptureStateChange({ isCapturing }) {
+        this.dom.liveCaptureControls.classList.toggle('card--hidden', !isCapturing);
+        this.dom.uploadGroup.forEach(el => el.classList.toggle('card--hidden', isCapturing));
     }
 
     showContextWarning() {
@@ -80,8 +110,9 @@ export class QCMCard {
             btn.classList.toggle('lang-switcher__btn--active', btn.dataset.lang === state.lang);
         });
 
-        // Clear file list on reset
-        if (state.uiState === 'form' && !state.qcmFile) {
+        // When the app resets to its initial form state, we ONLY clear the file list.
+        // We DO NOT stop an active capture.
+        if (state.uiState === 'form') {
             this.updateFileListUI(null);
         }
     }

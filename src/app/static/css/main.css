@@ -1,4 +1,3 @@
-/* src/app/static/css/main.css */
 :root {
     --bg-color: #1a1d24;
     --card-bg-color: #242832;
@@ -160,6 +159,37 @@ body {
 .button--secondary:hover { background-color: #4b5563; }
 .button:disabled { opacity: 0.5; cursor: not-allowed; }
 
+/* --- LIVE CAPTURE CONTROLS --- */
+.button-group {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.capture-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: var(--success-color);
+    padding: 0.5rem;
+    background-color: rgba(74, 222, 128, 0.1);
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+}
+.capture-status__indicator {
+    width: 10px;
+    height: 10px;
+    background-color: var(--success-color);
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+}
+
 /* --- RESULTS & STATES --- */
 #resultsSection { margin-top: 2rem; }
 .results--hidden { display: none !important; }
@@ -206,55 +236,3 @@ body {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
 }
-
-/* --- CAPTURE OVERLAY --- */
-.capture-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.8);
-    z-index: 10000;
-    cursor: crosshair;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-.capture-overlay__image {
-    max-width: 90vw;
-    max-height: 80vh;
-    object-fit: contain;
-    border: 2px solid white;
-}
-.capture-overlay__canvas {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    cursor: crosshair;
-    max-width: 90vw;
-    max-height: 80vh;
-}
-.capture-overlay__instructions {
-    color: white;
-    text-align: center;
-    margin-bottom: 20px;
-    font-size: 18px;
-}
-.capture-overlay__button-container {
-    margin-top: 20px;
-    display: flex;
-    gap: 10px;
-}
-.capture-overlay__btn {
-    padding: 10px 20px;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-}
-.capture-overlay__btn--confirm { background: #007bff; }
-.capture-overlay__btn--cancel { background: #6c757d; }

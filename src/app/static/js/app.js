@@ -1,11 +1,9 @@
-// src/app/static/js/app.js
 import { StateManager } from './state.js';
 import { ApiService } from './api.js';
 import { I18n } from './i18n.js';
 import { Sidebar } from './ui/sidebar.js';
 import { QCMCard } from './ui/qcmCard.js';
 import { Results } from './ui/results.js';
-import { Capture } from './ui/capture.js';
 
 export class App {
     constructor() {
@@ -17,16 +15,11 @@ export class App {
         this.sidebar = new Sidebar(this.stateManager, this.i18n);
         this.qcmCard = new QCMCard(this.stateManager, this.i18n);
         this.results = new Results(this.stateManager, this.i18n);
-        this.capture = new Capture(this.i18n);
 
         this.bindEventListeners();
         this.initializeApp();
     }
 
-    /**
-     * Binds handlers to custom events fired by UI components.
-     * This is the core of the Controller logic.
-     */
     bindEventListeners() {
         document.addEventListener('languageChange', (e) => this.setLanguage(e.detail.lang));
         document.addEventListener('documentFileSelected', (e) => this.processDocument(e.detail.file));
@@ -36,11 +29,8 @@ export class App {
         document.addEventListener('resetApp', () => this.resetUI());
     }
 
-    /**
-     * Initial application setup.
-     */
     async initializeApp() {
-        this.setLanguage('en', true); // Set default language
+        this.setLanguage('en', true);
         await this.loadDocuments();
     }
 
@@ -55,7 +45,7 @@ export class App {
             this.stateManager.setDocuments(documents);
         } catch (error) {
             console.error('Failed to load documents:', error);
-            this.stateManager.setDocuments([]); // You might want a specific error state here
+            this.stateManager.setDocuments([]);
         }
     }
 
@@ -64,7 +54,7 @@ export class App {
         try {
             await this.apiService.uploadDocument(file);
             this.sidebar.setUploadStatus(this.i18n.t('pdfAdded', { fileName: file.name }), true);
-            await this.loadDocuments(); // Refresh the list
+            await this.loadDocuments();
         } catch (error) {
             this.sidebar.setUploadStatus(this.i18n.t('pdfError', { errorMessage: error.message }), false, true);
         }
@@ -75,7 +65,7 @@ export class App {
         try {
             await this.apiService.deleteDocument(docId);
             this.stateManager.removeSelectedContext(docId);
-            await this.loadDocuments(); // Refresh the list
+            await this.loadDocuments();
         } catch (error) {
             alert(this.i18n.t('alertError'));
         }
@@ -85,6 +75,7 @@ export class App {
         const { selectedContextIds } = this.stateManager.getState();
         if (selectedContextIds.size === 0) {
             this.qcmCard.showContextWarning();
+            this.qcmCard.signalProcessingComplete();
             return;
         }
 
@@ -96,10 +87,15 @@ export class App {
             this.stateManager.setUiState('success', result);
         } catch (error) {
             this.stateManager.setUiState('error', error.message);
+        } finally {
+            this.qcmCard.signalProcessingComplete();
         }
     }
 
     resetUI() {
+        if (this.stateManager.getState().isCapturing) {
+            this.qcmCard.captureModule.stopCapture();
+        }
         this.stateManager.resetQCM();
         this.stateManager.setUiState('form');
     }

@@ -1,3 +1,4 @@
+
 import { Capture } from './capture.js';
 
 export class QCMCard {
@@ -22,8 +23,8 @@ export class QCMCard {
 
             // Live capture elements
             liveCaptureControls: document.getElementById('liveCaptureControls'),
-            findAnswerLiveBtn: document.getElementById('findAnswerLiveBtn'),
             stopCaptureBtn: document.getElementById('stopCaptureBtn'),
+
             uploadGroup: [ // Elements to hide during live capture
                 document.getElementById('qcmDropZone'),
                 document.querySelector('.separator'),
@@ -33,24 +34,27 @@ export class QCMCard {
     }
 
     setupEventListeners() {
-        // Standard file upload
         this.dom.dropZone.addEventListener('click', () => this.triggerInputClick());
         this.dom.input.addEventListener('change', e => this.handleFileSelect(e.target.files[0]));
 
-        // Language switcher
         this.dom.langButtons.forEach(btn => {
             btn.addEventListener('click', () => {
                 document.dispatchEvent(new CustomEvent('languageChange', { detail: { lang: btn.dataset.lang } }));
             });
         });
 
-        // Live Capture events
         this.dom.captureBtn.addEventListener('click', () => this.startLiveCapture());
-        this.dom.findAnswerLiveBtn.addEventListener('click', () => this.solveFromLiveCapture());
         this.dom.stopCaptureBtn.addEventListener('click', () => this.captureModule.stopCapture());
-
-        // Listen for state changes from the capture module
         document.addEventListener('captureStateChange', (e) => this.onCaptureStateChange(e.detail));
+        document.addEventListener('significantChangeDetected', () => this.handleSignificantChange());
+    }
+
+    handleSignificantChange() {
+        this.solveFromLiveCapture();
+    }
+
+    signalProcessingComplete() {
+        this.captureModule.resetChangeDetection();
     }
 
     triggerInputClick() {
@@ -72,20 +76,25 @@ export class QCMCard {
             this.showContextWarning();
             return;
         }
+        // The capture module will now automatically trigger the first analysis
         await this.captureModule.startCapture();
     }
 
     solveFromLiveCapture() {
-        const file = this.captureModule.getLatestCapture();
-        if (file) {
-            this.handleFileSelect(file);
-        } else {
-            console.warn("No capture available to send.");
-            // Optionally, provide user feedback here
-        }
+        // A short delay to ensure the file from the blob is ready
+        setTimeout(() => {
+            const file = this.captureModule.getLatestCapture();
+            if (file) {
+                this.handleFileSelect(file);
+            } else {
+                console.warn("No capture available to send.");
+                this.captureModule.resetChangeDetection();
+            }
+        }, 100);
     }
 
     onCaptureStateChange({ isCapturing }) {
+        this.stateManager.setCapturing(isCapturing);
         this.dom.liveCaptureControls.classList.toggle('card--hidden', !isCapturing);
         this.dom.uploadGroup.forEach(el => el.classList.toggle('card--hidden', isCapturing));
     }
@@ -98,21 +107,17 @@ export class QCMCard {
     }
 
     updateFileListUI(file) {
-        this.dom.fileList.innerHTML = file ? `<div>${file.name}</div>` : '';
+        this.dom.fileList.innerHTML = file ? `<div>Processing...</div>` : '';
     }
 
     render(state) {
-        // Show/hide the card based on the main UI state
-        this.dom.card.classList.toggle('card--hidden', state.uiState !== 'form');
+        // Keep the card visible during capture so the "Stop" button is always accessible
+        this.dom.card.classList.toggle('card--hidden', state.uiState !== 'form' && !state.isCapturing);
 
-        // Update language switcher active state
         this.dom.langButtons.forEach(btn => {
             btn.classList.toggle('lang-switcher__btn--active', btn.dataset.lang === state.lang);
         });
-
-        // When the app resets to its initial form state, we ONLY clear the file list.
-        // We DO NOT stop an active capture.
-        if (state.uiState === 'form') {
+        if (state.uiState === 'form' && !state.isCapturing) {
             this.updateFileListUI(null);
         }
     }

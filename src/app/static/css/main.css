@@ -160,22 +160,29 @@ body {
 .button:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* --- LIVE CAPTURE CONTROLS --- */
-.button-group {
+.live-capture-controls {
     margin-top: 1rem;
     display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--bg-color);
+}
+.live-capture-controls .button--secondary {
+    margin-top: 0;
+    width: auto;
+    flex-shrink: 0;
 }
 .capture-status {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
     color: var(--success-color);
-    padding: 0.5rem;
-    background-color: rgba(74, 222, 128, 0.1);
-    border-radius: 6px;
-    margin-bottom: 0.5rem;
+    font-weight: 600;
 }
 .capture-status__indicator {
     width: 10px;

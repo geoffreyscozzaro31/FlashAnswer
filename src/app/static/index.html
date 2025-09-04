@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n-key="pageTitle">QCM Resolver</title>
+    <title data-i18n-key="pageTitle">FlashAnswer</title>
     <link rel="stylesheet" href="/static/css/main.css">
 </head>
 <body>
@@ -81,8 +81,17 @@
                     <div class="separator" data-i18n-key="or">or</div>
                     <button id="captureBtn" class="button button--primary">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                        <span data-i18n-key="captureScreen">Capture Screen</span>
+                        <span data-i18n-key="startCapture">Start Live Capture</span>
                     </button>
+                    <div id="liveCaptureControls" class="live-capture-controls card--hidden">
+                        <div id="captureStatus" class="capture-status">
+                            <span class="capture-status__indicator"></span>
+                            <span data-i18n-key="capturing">Capturing...</span>
+                        </div>
+                        <button id="stopCaptureBtn" class="button button--secondary">
+                            <span data-i18n-key="stopCapture">Stop Capture</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -112,7 +121,6 @@
                         <summary data-i18n-key="showContext">Show context used</summary>
                         <pre><code id="resultContext"></code></pre>
                     </details>
-                    <button id="startOverBtn" class="button button--secondary" data-i18n-key="startOver">Start Over</button>
                 </div>
             </section>
         </main>

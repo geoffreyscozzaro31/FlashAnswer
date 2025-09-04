@@ -1,5 +1,3 @@
-// src/app/static/js/state.js
-
 /**
  * Manages the application's state and notifies listeners of changes.
  * This acts as the "Model" in our architecture.
@@ -13,27 +11,26 @@ export class StateManager {
             selectedContextIds: new Set(),
             qcmFile: null,
             lastResult: null,
+            isCapturing: false, // Tracks the state of the live capture
         };
         this.listeners = [];
     }
 
-    /**
-     * Subscribe a listener function to be called on state changes.
-     * @param {Function} listener - The callback function.
-     */
     subscribe(listener) {
         this.listeners.push(listener);
     }
 
-    /**
-     * Notifies all subscribed listeners about a state change.
-     */
     notify() {
         this.listeners.forEach(listener => listener(this.state));
     }
 
     getState() {
         return { ...this.state };
+    }
+
+    setCapturing(status) {
+        this.state.isCapturing = status;
+        this.notify();
     }
 
     setLanguage(lang) {
@@ -58,7 +55,6 @@ export class StateManager {
 
     setLastResult(result) {
         this.state.lastResult = result;
-        // No notify, as setUiState('success') will trigger the render.
     }
 
     updateSelectedContexts(docId) {
@@ -78,6 +74,5 @@ export class StateManager {
     resetQCM() {
         this.state.qcmFile = null;
         this.state.lastResult = null;
-        // No notify, as setUiState('form') will trigger the render.
     }
 }

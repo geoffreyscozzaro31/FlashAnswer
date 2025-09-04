@@ -1,4 +1,4 @@
-// src/app/static/js/ui/qcmCard.js
+
 import { Capture } from './capture.js';
 
 export class QCMCard {
@@ -20,30 +20,41 @@ export class QCMCard {
             warning: document.getElementById('contextWarning'),
             captureBtn: document.getElementById('captureBtn'),
             langButtons: document.querySelectorAll('.lang-switcher__btn'),
+
+            // Live capture elements
+            liveCaptureControls: document.getElementById('liveCaptureControls'),
+            stopCaptureBtn: document.getElementById('stopCaptureBtn'),
+
+            uploadGroup: [ // Elements to hide during live capture
+                document.getElementById('qcmDropZone'),
+                document.querySelector('.separator'),
+                document.getElementById('captureBtn')
+            ]
         };
     }
 
     setupEventListeners() {
         this.dom.dropZone.addEventListener('click', () => this.triggerInputClick());
         this.dom.input.addEventListener('change', e => this.handleFileSelect(e.target.files[0]));
-        // Drag and drop events...
-
-        this.dom.captureBtn.addEventListener('click', async () => {
-            if (this.stateManager.getState().selectedContextIds.size === 0) {
-                this.showContextWarning();
-                return;
-            }
-            const file = await this.captureModule.startCapture();
-            if (file) {
-                this.handleFileSelect(file);
-            }
-        });
 
         this.dom.langButtons.forEach(btn => {
             btn.addEventListener('click', () => {
                 document.dispatchEvent(new CustomEvent('languageChange', { detail: { lang: btn.dataset.lang } }));
             });
         });
+
+        this.dom.captureBtn.addEventListener('click', () => this.startLiveCapture());
+        this.dom.stopCaptureBtn.addEventListener('click', () => this.captureModule.stopCapture());
+        document.addEventListener('captureStateChange', (e) => this.onCaptureStateChange(e.detail));
+        document.addEventListener('significantChangeDetected', () => this.handleSignificantChange());
+    }
+
+    handleSignificantChange() {
+        this.solveFromLiveCapture();
+    }
+
+    signalProcessingComplete() {
+        this.captureModule.resetChangeDetection();
     }
 
     triggerInputClick() {
@@ -60,6 +71,34 @@ export class QCMCard {
         document.dispatchEvent(new CustomEvent('qcmFileSelected', { detail: { file } }));
     }
 
+    async startLiveCapture() {
+        if (this.stateManager.getState().selectedContextIds.size === 0) {
+            this.showContextWarning();
+            return;
+        }
+        // The capture module will now automatically trigger the first analysis
+        await this.captureModule.startCapture();
+    }
+
+    solveFromLiveCapture() {
+        // A short delay to ensure the file from the blob is ready
+        setTimeout(() => {
+            const file = this.captureModule.getLatestCapture();
+            if (file) {
+                this.handleFileSelect(file);
+            } else {
+                console.warn("No capture available to send.");
+                this.captureModule.resetChangeDetection();
+            }
+        }, 100);
+    }
+
+    onCaptureStateChange({ isCapturing }) {
+        this.stateManager.setCapturing(isCapturing);
+        this.dom.liveCaptureControls.classList.toggle('card--hidden', !isCapturing);
+        this.dom.uploadGroup.forEach(el => el.classList.toggle('card--hidden', isCapturing));
+    }
+
     showContextWarning() {
         this.dom.warning.classList.remove('warning-message--hidden');
         setTimeout(() => {
@@ -68,20 +107,17 @@ export class QCMCard {
     }
 
     updateFileListUI(file) {
-        this.dom.fileList.innerHTML = file ? `<div>${file.name}</div>` : '';
+        this.dom.fileList.innerHTML = file ? `<div>Processing...</div>` : '';
     }
 
     render(state) {
-        // Show/hide the card based on the main UI state
-        this.dom.card.classList.toggle('card--hidden', state.uiState !== 'form');
+        // Keep the card visible during capture so the "Stop" button is always accessible
+        this.dom.card.classList.toggle('card--hidden', state.uiState !== 'form' && !state.isCapturing);
 
-        // Update language switcher active state
         this.dom.langButtons.forEach(btn => {
             btn.classList.toggle('lang-switcher__btn--active', btn.dataset.lang === state.lang);
         });
-
-        // Clear file list on reset
-        if (state.uiState === 'form' && !state.qcmFile) {
+        if (state.uiState === 'form' && !state.isCapturing) {
             this.updateFileListUI(null);
         }
     }

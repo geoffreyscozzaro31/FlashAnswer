@@ -45,6 +45,9 @@ CHROMA_DB_PATH.mkdir(exist_ok=True)
 # --- QCM Vision and RAG configuration ---
 QCM_CONFIG = _config.get("qcm_analysis", {})
 
+
+VISION_SERVICE = "gemini"
+
 # Vision extraction
 VISION_MODEL = QCM_CONFIG.get("vision_model", "gemini-1.5-flash")
 MIN_QUESTION_LENGTH = QCM_CONFIG.get("min_question_length", 10)

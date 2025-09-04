@@ -7,7 +7,7 @@ from fastapi import APIRouter, UploadFile, File, HTTPException, status, Form
 
 from src.app.logger.logger_configuration import logger
 from src.app.service.document_service import process_document_and_embed
-from src.app.service.qcm_vision_service import qcm_vision_analysis_service
+from src.app.service import qcm_analysis_service
 from src.app.service.vector_store_service import vector_store_service
 from src.app.utils.file_utils import is_allowed_file, save_temp_file
 
@@ -43,7 +43,7 @@ async def solve_qcm(context_ids: str = Form("[]"), file: UploadFile = File(...))
         temp_path = save_temp_file(file)
 
         result = await asyncio.to_thread(
-            qcm_vision_analysis_service.analyze_qcm_complete,
+            qcm_analysis_service.analyze_qcm_complete,
             image_path=temp_path,
             context_doc_ids=doc_ids
         )

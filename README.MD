@@ -83,19 +83,7 @@ Follow these steps to get the project running on your local machine.
     cd QCM-Resolver
     ```
 
-2.  **Create and activate a virtual environment** (recommended):
-    ```bash
-    # Create the virtual environment
-    python -m venv venv
-
-    # Activate on Windows
-    .\venv\Scripts\activate
-
-    # Activer on macOS/Linux
-    source venv/bin/activate
-    ```
-
-3.  **Install dependencies**:
+2.  **Install dependencies**:
     ```bash
     pip install -r requirements.txt
     ```

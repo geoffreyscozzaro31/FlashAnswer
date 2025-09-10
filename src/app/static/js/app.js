@@ -51,10 +51,20 @@ export class App {
 
     async processDocument(file) {
         this.sidebar.setUploadStatus(this.i18n.t('processingPdf'));
+
+        const oldDocIds = new Set(this.stateManager.getState().documents.map(d => d.id));
+
         try {
             await this.apiService.uploadDocument(file);
             this.sidebar.setUploadStatus(this.i18n.t('pdfAdded', { fileName: file.name }), true);
             await this.loadDocuments();
+
+            const newDocuments = this.stateManager.getState().documents;
+            const newDoc = newDocuments.find(doc => !oldDocIds.has(doc.id));
+            if (newDoc) {
+                this.stateManager.selectSingleContext(newDoc.id);
+            }
+
         } catch (error) {
             this.sidebar.setUploadStatus(this.i18n.t('pdfError', { errorMessage: error.message }), false, true);
         }
@@ -73,10 +83,9 @@ export class App {
 
     async solveQCM(file) {
         const { selectedContextIds } = this.stateManager.getState();
+
         if (selectedContextIds.size === 0) {
-            this.qcmCard.showContextWarning();
-            this.qcmCard.signalProcessingComplete();
-            return;
+            this.qcmCard.showContextInfoMessage(this.i18n.t('contextOptionalHint'));
         }
 
         this.stateManager.setUiState('loading', this.i18n.t('solvingQcm'));

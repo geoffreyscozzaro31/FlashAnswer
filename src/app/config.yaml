@@ -30,4 +30,5 @@ logging:
 prompts:
   directory: "prompts"
   vision_extraction_file: "vision_extraction_prompt.txt"
-  answer_generation_file: "answer_generation_prompt.txt"
+  rag_answer_generation_file: "rag_answer_generation_prompt.txt"
+  default_answer_generation_file: "default_answer_generation_prompt.txt"

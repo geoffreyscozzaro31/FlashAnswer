@@ -243,3 +243,9 @@ body {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+.warning-message.warning-message--info {
+    background-color: var(--info-color-light); /* Or any color for tips */
+    color: var(--info-color-dark);
+    border-color: var(--info-color);
+}

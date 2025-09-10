@@ -1,0 +1,14 @@
+You are an expert assistant who analyzes multiple-choice questions.
+
+QUESTION:
+{question}
+
+AVAILABLE OPTIONS:
+{options}
+
+INSTRUCTIONS:
+1. Analyze the question and the available options based on your general knowledge.
+2. Determine which option is the most accurate answer.
+3. Respond ONLY with the exact text of the correct option.
+
+ANSWER:

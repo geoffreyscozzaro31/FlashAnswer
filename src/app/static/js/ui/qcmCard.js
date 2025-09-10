@@ -1,4 +1,3 @@
-
 import { Capture } from './capture.js';
 
 export class QCMCard {
@@ -14,18 +13,16 @@ export class QCMCard {
     cacheDOMElements() {
         this.dom = {
             card: document.getElementById('qcmCard'),
+            cardBody: document.getElementById('qcmCardBody'), // Added for toast message placement
             dropZone: document.getElementById('qcmDropZone'),
             input: document.getElementById('qcmInput'),
             fileList: document.getElementById('qcmFileList'),
             warning: document.getElementById('contextWarning'),
             captureBtn: document.getElementById('captureBtn'),
             langButtons: document.querySelectorAll('.lang-switcher__btn'),
-
-            // Live capture elements
             liveCaptureControls: document.getElementById('liveCaptureControls'),
             stopCaptureBtn: document.getElementById('stopCaptureBtn'),
-
-            uploadGroup: [ // Elements to hide during live capture
+            uploadGroup: [
                 document.getElementById('qcmDropZone'),
                 document.querySelector('.separator'),
                 document.getElementById('captureBtn')
@@ -57,11 +54,8 @@ export class QCMCard {
         this.captureModule.resetChangeDetection();
     }
 
+    // MODIFIED: The blocking check has been removed.
     triggerInputClick() {
-        if (this.stateManager.getState().selectedContextIds.size === 0) {
-            this.showContextWarning();
-            return;
-        }
         this.dom.input.click();
     }
 
@@ -71,17 +65,12 @@ export class QCMCard {
         document.dispatchEvent(new CustomEvent('qcmFileSelected', { detail: { file } }));
     }
 
+    // MODIFIED: The blocking check has been removed.
     async startLiveCapture() {
-        if (this.stateManager.getState().selectedContextIds.size === 0) {
-            this.showContextWarning();
-            return;
-        }
-        // The capture module will now automatically trigger the first analysis
         await this.captureModule.startCapture();
     }
 
     solveFromLiveCapture() {
-        // A short delay to ensure the file from the blob is ready
         setTimeout(() => {
             const file = this.captureModule.getLatestCapture();
             if (file) {
@@ -99,19 +88,34 @@ export class QCMCard {
         this.dom.uploadGroup.forEach(el => el.classList.toggle('card--hidden', isCapturing));
     }
 
+    // DEPRECATED: This hard warning is no longer the primary UX.
     showContextWarning() {
-        this.dom.warning.classList.remove('warning-message--hidden');
+        this.dom.warning.textContent = this.i18n.t('contextRequired'); // Assumes this key exists
+        this.dom.warning.classList.remove('warning-message--hidden', 'warning-message--info');
         setTimeout(() => {
             this.dom.warning.classList.add('warning-message--hidden');
         }, 5000);
+    }
+
+    // NEW: Method for showing a non-blocking informational message.
+    showContextInfoMessage(message) {
+        this.dom.warning.textContent = message;
+        this.dom.warning.classList.add('warning-message--info'); // Add class for different styling
+        this.dom.warning.classList.remove('warning-message--hidden');
+        setTimeout(() => {
+            this.dom.warning.classList.add('warning-message--hidden');
+            // Clean up the class after the animation
+            setTimeout(() => this.dom.warning.classList.remove('warning-message--info'), 500);
+        }, 4000);
     }
 
     updateFileListUI(file) {
         this.dom.fileList.innerHTML = file ? `<div>Processing...</div>` : '';
     }
 
+
+
     render(state) {
-        // Keep the card visible during capture so the "Stop" button is always accessible
         this.dom.card.classList.toggle('card--hidden', state.uiState !== 'form' && !state.isCapturing);
 
         this.dom.langButtons.forEach(btn => {

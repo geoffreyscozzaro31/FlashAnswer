@@ -19,8 +19,12 @@ class QCMVisionAnalysisService:
         if not config.GEMINI_API_KEY:
             raise ValueError("GEMINI_API_KEY is missing")
 
+        rag_prompt_text = self._load_prompt(
+            config.RAG_PROMPT_FILE)
+        no_rag_prompt_text = self._load_prompt(
+            config.DEFAULT_PROMPT_FILE)
+
         self.vision_extraction_prompt = self._load_prompt(config.VISION_PROMPT_FILE)
-        self.answer_generation_prompt = self._load_prompt(config.ANSWER_PROMPT_FILE)
 
         self.vision_llm = ChatGoogleGenerativeAI(
             model=config.VISION_MODEL,
@@ -38,14 +42,15 @@ class QCMVisionAnalysisService:
             google_api_key=config.GEMINI_API_KEY
         )
 
-        self.answer_prompt = PromptTemplate.from_template(self.answer_generation_prompt)
+        self.rag_prompt = PromptTemplate.from_template(rag_prompt_text)
+        self.no_rag_prompt = PromptTemplate.from_template(no_rag_prompt_text)
 
     def _load_prompt(self, filename: str) -> str:
         try:
             file_path = config.PROMPT_DIR / filename
             return file_path.read_text(encoding="utf-8")
         except FileNotFoundError:
-            raise FileNotFoundError("Prompt file not found")
+            raise FileNotFoundError(f"Prompt file not found: {filename}")
         except Exception as e:
             raise IOError(f"Error loading prompt file '{filename}': {e}")
 
@@ -56,6 +61,9 @@ class QCMVisionAnalysisService:
             logger.info("[qcm-ANALYSIS] === STARTING COMPLETE ANALYSIS ===")
             logger.info(f"[qcm-ANALYSIS] Image: {image_path}")
             logger.info(f"[qcm-ANALYSIS] Selected context: {context_doc_ids}")
+
+        is_rag_active = bool(context_doc_ids)
+        logger.info(f"[qcm-ANALYSIS] RAG mode is {'ACTIVE' if is_rag_active else 'INACTIVE'}")
 
         if config.LOG_TIMINGS:
             logger.info("[VISION] === STEP 1: VISION EXTRACTION ===")
@@ -75,22 +83,26 @@ class QCMVisionAnalysisService:
             logger.info(f"[VISION] Extracted question: {question[:100]}...")
             logger.info(f"[VISION] Options: {[opt[:50] + '...' if len(opt) > 50 else opt for opt in options]}")
 
-        if config.LOG_TIMINGS:
-            logger.info("[RAG] === STEP 2: CONTEXT RETRIEVAL ===")
-
-        rag_start = time.time()
-        context_text = self._retrieve_context(question, context_doc_ids)
-        rag_time = time.time() - rag_start
-
-        if config.LOG_TIMINGS:
-            logger.info(f"[RAG] Finished in {rag_time:.2f}s")
-            logger.info(f"[RAG] Retrieved context: {len(context_text)} characters")
+        context_text = ""
+        rag_time = 0
+        if is_rag_active:
+            if config.LOG_TIMINGS:
+                logger.info("[RAG] === STEP 2: CONTEXT RETRIEVAL ===")
+            rag_start = time.time()
+            context_text = self._retrieve_context(question, context_doc_ids)
+            rag_time = time.time() - rag_start
+            if config.LOG_TIMINGS:
+                logger.info(f"[RAG] Finished in {rag_time:.2f}s")
+                logger.info(f"[RAG] Retrieved context: {len(context_text)} characters")
+        else:
+            if config.LOG_TIMINGS:
+                logger.info("[RAG] === STEP 2: SKIPPED (no context doc IDs) ===")
 
         if config.LOG_TIMINGS:
             logger.info("[ANSWER] === STEP 3: ANSWER GENERATION ===")
 
         answer_start = time.time()
-        answer = self._generate_answer(question, options, context_text)
+        answer = self._generate_answer(question, options, context_text, is_rag_active)
         answer_time = time.time() - answer_start
 
         if config.LOG_TIMINGS:
@@ -196,22 +208,33 @@ class QCMVisionAnalysisService:
             logger.error(f"Error retrieving context: {e}")
             return "Error while retrieving context."
 
-    def _generate_answer(self, question: str, options: List[str], context: str) -> str:
+    def _generate_answer(self, question: str, options: List[str], context: str, is_rag_active: bool) -> str:
         try:
             options_text = "\n".join([f"{i + 1}. {opt}" for i, opt in enumerate(options)])
 
-            prompt_input = {
-                "question": question,
-                "options": options_text,
-                "context": context
-            }
+            if is_rag_active:
+                prompt_template = self.rag_prompt
+                prompt_input = {
+                    "question": question,
+                    "options": options_text,
+                    "context": context
+                }
+                logger.info("[ANSWER] Generating grounded answer using RAG...")
+            else:
+                prompt_template = self.no_rag_prompt
+                prompt_input = {
+                    "question": question,
+                    "options": options_text
+                }
+                logger.info("[ANSWER] Generating estimated answer using LLM knowledge...")
 
-            logger.info("[ANSWER] Generating answer via LLM...")
-
-            chain = self.answer_prompt | self.llm
+            chain = prompt_template | self.llm
             response = chain.invoke(prompt_input)
 
             answer = response.content.strip()
+
+            if not is_rag_active:
+                answer += " (reponse generated without context)"
 
             if config.LOG_GEMINI_RESPONSES:
                 logger.info(f"[ANSWER] Prompt sent: {question}")

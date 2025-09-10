@@ -66,6 +66,12 @@ export class StateManager {
         this.notify();
     }
 
+    selectSingleContext(docId) {
+        this.state.selectedContextIds.clear();
+        this.state.selectedContextIds.add(docId);
+        this.notify();
+    }
+
     removeSelectedContext(docId) {
         this.state.selectedContextIds.delete(docId);
         this.notify();

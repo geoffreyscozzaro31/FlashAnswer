@@ -79,23 +79,11 @@ Follow these steps to get the project running on your local machine.
 
 1.  **Clone the repository**:
     ```bash
-    git clone https://your-repo-url.git
-    cd QCM-Resolver
+    git clone https://github.com/geoffreyscozzaro31/FlashAnswer.git
+    cd FlashAnswer
     ```
 
-2.  **Create and activate a virtual environment** (recommended):
-    ```bash
-    # Create the virtual environment
-    python -m venv venv
-
-    # Activate on Windows
-    .\venv\Scripts\activate
-
-    # Activer on macOS/Linux
-    source venv/bin/activate
-    ```
-
-3.  **Install dependencies**:
+2.  **Install dependencies**:
     ```bash
     pip install -r requirements.txt
     ```
@@ -143,53 +131,6 @@ You have three options:
 
 ### Step 3: Get the Answer
 The AI will process the image, find relevant information in your selected documents, and display the most likely answer along with the context it used.
-
-
-## 🐳 Running with Docker
-
-You can run this application in a container using Docker, which simplifies setup and ensures a consistent environment.
-
-## Option A: Run the Pre-built Image from Docker Hub (Recommended)
-
-1. **Prerequisites**  
-   - [Docker](https://docs.docker.com/get-docker/) installed and running.
-
-2. **Configuration**  
-   - Create a `.env` file in your working directory with:  
-     GEMINI_API_KEY="YOUR_SECRET_GEMINI_API_KEY"
-
-3. **Run the Container**  
-   docker run -d -p 8000:8000 --name qcm-resolver-app --env-file .env -v chroma_data:/app/src/app/db/chroma geoffreyscozzaro/qcm-resolver:v0
-
-4. **Stop the Container**  
-   docker stop qcm-resolver-app
-
-5. **Restart the Container**  
-   docker start qcm-resolver-app
-
----
-
-## Option B: Build the Image Locally using Docker Compose
-
-1. **Prerequisites**  
-   - [Docker](https://docs.docker.com/get-docker/) & [Docker Compose](https://docs.docker.com/compose/install/)  
-   - The source code cloned locally
-
-2. **Configuration**  
-   - Ensure a `.env` file exists in the root of the project.
-
-3. **Build and Run**  
-   docker-compose up --build
-
-4. **Stop the Application**  
-   Press Ctrl+C and then run:  
-   docker-compose down
-
-### Accessing the Application
-
-For both options, the application will be available at:
--   **Web Interface**: [http://127.0.0.1:8000](http://127.0.0.1:8000)
--   **API Docs**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
 
 

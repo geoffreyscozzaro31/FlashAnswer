@@ -7,9 +7,11 @@ from typing import Dict, List, Optional
 from PIL import Image
 from langchain.prompts import PromptTemplate
 from langchain_core.messages import HumanMessage
-from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_community.embeddings import HuggingFaceEmbeddings
 
 from src.app import config
+from src.app.config import HF_EMBEDDING_MODEL
 from src.app.logger.logger_configuration import logger
 from src.app.service.vector_store_service import vector_store_service
 
@@ -19,24 +21,25 @@ class QCMVisionAnalysisService:
         if not config.GEMINI_API_KEY:
             raise ValueError("GEMINI_API_KEY is missing")
 
+        # 1. Chargement des prompts
         self.vision_extraction_prompt = self._load_prompt(config.VISION_PROMPT_FILE)
         self.answer_generation_prompt = self._load_prompt(config.ANSWER_PROMPT_FILE)
 
+        # 2. Modèles de langage
+        # Modèle de vision pour l'analyse d'images (Gemini Vision)
         self.vision_llm = ChatGoogleGenerativeAI(
             model=config.VISION_MODEL,
             google_api_key=config.GEMINI_API_KEY,
         )
 
+        # Modèle de chat pour la génération de réponses
         self.llm = ChatGoogleGenerativeAI(
             model=config.LLM_CHAT_MODEL,
             google_api_key=config.GEMINI_API_KEY,
             temperature=config.ANSWER_TEMPERATURE
         )
 
-        self.embeddings_model = GoogleGenerativeAIEmbeddings(
-            model=config.LLM_EMBEDDING_MODEL,
-            google_api_key=config.GEMINI_API_KEY
-        )
+        self.embeddings_model = HuggingFaceEmbeddings(model_name=HF_EMBEDDING_MODEL)
 
         self.answer_prompt = PromptTemplate.from_template(self.answer_generation_prompt)
 

@@ -17,3 +17,7 @@ tiktoken==0.11.0  # Token counting
 
 # For testing
 pytest==8.4.1
+
+#for model embeddings
+langchain_community==0.3.29
+sentence_transformers==5.1.0

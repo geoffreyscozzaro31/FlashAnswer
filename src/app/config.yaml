@@ -7,7 +7,7 @@ upload:
   allowed_image_extensions: [".png", ".jpg", ".jpeg", ".webp"]
 
 llm:
-  embedding_model: "models/embedding-001"
+  embedding_model: "models/text-multilingual-embedding-002"
   chat_model: "gemini-2.5-flash-lite"
 
 vector_store:
@@ -17,10 +17,10 @@ qcm_analysis:
   vision_model: "gemini-2.5-flash-lite"
   min_question_length: 10
   max_options_to_extract: 4
-  rag_chunks_count: 5
-  rag_similarity_threshold: 0.0
+  rag_chunks_count: 15
+  rag_similarity_threshold: 0.15
   answer_temperature: 0.0
-  max_context_chars: 5000
+  max_context_chars: 10000
 
 logging:
   log_gemini_responses: true

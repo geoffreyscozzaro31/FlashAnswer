@@ -1,15 +1,17 @@
-import fitz  # PyMuPDF
 import uuid
+
+import fitz  # PyMuPDF
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
+
+from src.app.config import HF_EMBEDDING_MODEL
 from src.app.service.vector_store_service import vector_store_service
-from src.app import config
+
 
 async def process_document_and_embed(pdf_path: str, original_filename: str) -> int:
     """Extracts text, splits it, and embeds it into ChromaDB persistently."""
-    # 1. The line `vector_store_service.clear_collection()` has been removed to ensure persistence.
 
-    # 2. Extract text from PDF with PyMuPDF
+    # 1. Extraire le texte du PDF
     text_content = ""
     with fitz.open(pdf_path) as doc:
         for page in doc:
@@ -18,18 +20,31 @@ async def process_document_and_embed(pdf_path: str, original_filename: str) -> i
     if not text_content.strip():
         raise ValueError("No text could be extracted from the PDF.")
 
-    # 3. Split the text into chunks
+    # 2. Diviser le texte en chunks
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
     chunks = text_splitter.split_text(text_content)
 
-    # 4. Create embeddings
-    embeddings_model = GoogleGenerativeAIEmbeddings(model=config.LLM_EMBEDDING_MODEL, google_api_key=config.GEMINI_API_KEY)
-    embeddings = embeddings_model.embed_documents(chunks)
+    # 3. Initialiser le modèle d'embedding
+    embeddings_model = HuggingFaceEmbeddings(model_name=HF_EMBEDDING_MODEL)
 
-    # 5. Add to ChromaDB with a unique ID for the document
-    doc_id = str(uuid.uuid4())  # A unique ID for the entire document
+    # --- ÉTAPE AJOUTÉE ---
+    # 4. Générer les embeddings (vecteurs) pour chaque chunk de texte
+    print("Generating embeddings for all chunks...")
+    embeddings_vectors = embeddings_model.embed_documents(chunks)
+    print("Embeddings generated.")
+
+    # 5. Préparer les métadonnées et les IDs
+    doc_id = str(uuid.uuid4())
     metadatas = [{"source": original_filename, "doc_id": doc_id} for _ in chunks]
-    ids = [str(uuid.uuid4()) for _ in chunks]  # Unique ID for each chunk
-    vector_store_service.add_documents(chunks, embeddings, metadatas, ids)
+    ids = [str(uuid.uuid4()) for _ in chunks]
+
+    # --- APPEL CORRIGÉ ---
+    # Maintenant, on passe la liste de vecteurs `embeddings_vectors`
+    vector_store_service.add_documents(
+        chunks=chunks,
+        embeddings=embeddings_vectors,
+        metadatas=metadatas,
+        ids=ids
+    )
 
     return len(chunks)

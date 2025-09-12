@@ -31,7 +31,9 @@ VECTOR_STORE_CONFIG = _config.get("vector_store", {})
 VECTOR_STORE_COLLECTION = VECTOR_STORE_CONFIG.get("collection_name", "qcm_documents")
 
 # --- API keys (from .env file) ---
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY2")
+
+HF_EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
 # --- Application paths ---
 BASE_DIR = Path(__file__).resolve().parent

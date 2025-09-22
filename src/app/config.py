@@ -23,15 +23,15 @@ ALLOWED_IMAGE_EXTENSIONS = set(UPLOAD_CONFIG.get("allowed_image_extensions", [])
 
 # --- LLM configuration ---
 LLM_CONFIG = _config.get("llm", {})
-LLM_EMBEDDING_MODEL = LLM_CONFIG.get("embedding_model", "models/embedding-001")
-LLM_CHAT_MODEL = LLM_CONFIG.get("chat_model", "gemini-1.5-flash")
+LLM_EMBEDDING_MODEL = LLM_CONFIG.get("embedding_model")
+LLM_CHAT_MODEL = LLM_CONFIG.get("chat_model")
 
 # --- Vector database configuration ---
 VECTOR_STORE_CONFIG = _config.get("vector_store", {})
 VECTOR_STORE_COLLECTION = VECTOR_STORE_CONFIG.get("collection_name", "qcm_documents")
 
 # --- API keys (from .env file) ---
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY2")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 HF_EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 

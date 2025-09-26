@@ -7,8 +7,6 @@
 
 An AI-powered web application that automatically answers Multiple-Choice Questions (MCQs) using your own documents as a knowledge base. Just upload your course notes, take a screenshot of a quiz, and get the answer instantly.
 
-The application runs entirely on your local machine, ensuring your data remains private.
-
 
 ## ✨ Core Features
 
@@ -16,7 +14,7 @@ The application runs entirely on your local machine, ensuring your data remains 
 -   **📸 Screenshot & Vision API**: Simply take a screenshot of a quiz. The app uses **Google Gemini Vision** to extract the question and options automatically.
 -   **✂️ Built-in Screen Capture**: No need for external tools. Capture any part of your screen directly from the web interface.
 -   **📚 PDF Knowledge Base**: Easily build a custom knowledge base by dragging and dropping your PDF course materials.
--   **🏠 Local & Private**: Your documents and queries never leave your machine, except for secure calls to the Google Gemini API. No user accounts needed.
+-   **🏠 Local & Private**: Your documents and queries never leave your machine, except for secure calls to the Google Gemini API.
 -   **🚀 Modern Web Interface**: A clean, simple, and responsive UI built with FastAPI for a smooth user experience.
 -   **🔌 RESTful API**: Includes clear endpoints to integrate the solving logic into other applications.
 

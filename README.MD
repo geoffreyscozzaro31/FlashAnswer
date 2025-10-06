@@ -155,7 +155,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 -   **Screen Capture Issues**: Screen capture requires a secure context (localhost or HTTPS) and user permission. If the button is disabled, your browser may not be supported.
 -   **Poor Answer Quality**: The quality of the answer depends heavily on the relevance of the information in your PDF documents. Ensure your knowledge base covers the topics of your questions.
 
-⚠️ Disclaimer / Educational Use Only
+## ⚠️ Disclaimer / Educational Use Only
 This project is intended for educational and entertainment purposes only.
 It should not be used during official exams, tests, or any form of academic assessment.
 The goal of FlashAnswer is to explore AI-assisted learning, document retrieval, and question answering — not to facilitate cheating or academic misconduct.

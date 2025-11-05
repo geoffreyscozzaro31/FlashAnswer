@@ -11,8 +11,6 @@
 
 An AI-powered web application that automatically answers Multiple-Choice Questions (MCQs) using your own documents as a knowledge base. Just upload your course notes, take a screenshot of a quiz, and get the answer instantly.
 
-The application runs entirely on your local machine, ensuring your data remains private.
-
 
 ## ✨ Core Features
 
@@ -20,7 +18,7 @@ The application runs entirely on your local machine, ensuring your data remains 
 -   **📸 Screenshot & Vision API**: Simply take a screenshot of a quiz. The app uses **Google Gemini Vision** to extract the question and options automatically.
 -   **✂️ Built-in Screen Capture**: No need for external tools. Capture any part of your screen directly from the web interface.
 -   **📚 PDF Knowledge Base**: Easily build a custom knowledge base by dragging and dropping your PDF course materials.
--   **🏠 Local & Private**: Your documents and queries never leave your machine, except for secure calls to the Google Gemini API. No user accounts needed.
+-   **🏠 Local & Private**: Your documents and queries never leave your machine, except for secure calls to the Google Gemini API.
 -   **🚀 Modern Web Interface**: A clean, simple, and responsive UI built with FastAPI for a smooth user experience.
 -   **🔌 RESTful API**: Includes clear endpoints to integrate the solving logic into other applications.
 
@@ -83,23 +81,11 @@ Follow these steps to get the project running on your local machine.
 
 1.  **Clone the repository**:
     ```bash
-    git clone https://your-repo-url.git
-    cd QCM-Resolver
+    git clone https://github.com/geoffreyscozzaro31/FlashAnswer.git
+    cd FlashAnswer
     ```
 
-2.  **Create and activate a virtual environment** (recommended):
-    ```bash
-    # Create the virtual environment
-    python -m venv venv
-
-    # Activate on Windows
-    .\venv\Scripts\activate
-
-    # Activer on macOS/Linux
-    source venv/bin/activate
-    ```
-
-3.  **Install dependencies**:
+2.  **Install dependencies**:
     ```bash
     pip install -r requirements.txt
     ```
@@ -149,53 +135,6 @@ You have three options:
 The AI will process the image, find relevant information in your selected documents, and display the most likely answer along with the context it used.
 
 
-## 🐳 Running with Docker
-
-You can run this application in a container using Docker, which simplifies setup and ensures a consistent environment.
-
-## Option A: Run the Pre-built Image from Docker Hub (Recommended)
-
-1. **Prerequisites**  
-   - [Docker](https://docs.docker.com/get-docker/) installed and running.
-
-2. **Configuration**  
-   - Create a `.env` file in your working directory with:  
-     GEMINI_API_KEY="YOUR_SECRET_GEMINI_API_KEY"
-
-3. **Run the Container**  
-   docker run -d -p 8000:8000 --name qcm-resolver-app --env-file .env -v chroma_data:/app/src/app/db/chroma geoffreyscozzaro/qcm-resolver:v0
-
-4. **Stop the Container**  
-   docker stop qcm-resolver-app
-
-5. **Restart the Container**  
-   docker start qcm-resolver-app
-
----
-
-## Option B: Build the Image Locally using Docker Compose
-
-1. **Prerequisites**  
-   - [Docker](https://docs.docker.com/get-docker/) & [Docker Compose](https://docs.docker.com/compose/install/)  
-   - The source code cloned locally
-
-2. **Configuration**  
-   - Ensure a `.env` file exists in the root of the project.
-
-3. **Build and Run**  
-   docker-compose up --build
-
-4. **Stop the Application**  
-   Press Ctrl+C and then run:  
-   docker-compose down
-
-### Accessing the Application
-
-For both options, the application will be available at:
--   **Web Interface**: [http://127.0.0.1:8000](http://127.0.0.1:8000)
--   **API Docs**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-
-
 
 ## 🤝 Contributing
 
@@ -219,3 +158,9 @@ Distributed under the MIT License. See `LICENSE` for more information.
 -   **API Key Errors**: Ensure your `GEMINI_API_KEY` is correctly set in the `.env` file.
 -   **Screen Capture Issues**: Screen capture requires a secure context (localhost or HTTPS) and user permission. If the button is disabled, your browser may not be supported.
 -   **Poor Answer Quality**: The quality of the answer depends heavily on the relevance of the information in your PDF documents. Ensure your knowledge base covers the topics of your questions.
+
+## ⚠️ Disclaimer / Educational Use Only
+This project is intended for educational and entertainment purposes only.
+It should not be used during official exams, tests, or any form of academic assessment.
+The goal of FlashAnswer is to explore AI-assisted learning, document retrieval, and question answering — not to facilitate cheating or academic misconduct.
+Users are responsible for ensuring that their use of this tool complies with their institution’s rules and applicable laws.

@@ -1,7 +1,7 @@
 # FlashAnswer - Solve Quizzes with AI
 
 <p align="center">
-  <img src="medias/demoFlashAnswer.gif" alt="FlashAnswer demo" width="1200"/>
+  <img src="medias/demoFlashAnswer.gif" alt="FlashAnswer demo" width="1000"/>
 </p>
 
 <!-- Badges: Remplacer les placeholders si nécessaire -->

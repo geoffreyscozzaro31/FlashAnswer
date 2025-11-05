@@ -1,5 +1,9 @@
 # FlashAnswer - Solve Quizzes with AI
 
+<p align="center">
+  <img src="medias/demoFlashAnswer.gif" alt="FlashAnswer demo" width="600"/>
+</p>
+
 <!-- Badges: Remplacer les placeholders si nécessaire -->
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Python Version](https://img.shields.io/badge/Python-3.10+-brightgreen.svg)
